@@ -57,4 +57,16 @@ class Ray:
 
     def cast(self, map):
 
-        pass
+        if self.dir.dotProd(Vector([0, 1])) > 0: # looking up
+            stepY = -1
+            nextY = int(self.pos.y)
+            yDist = (self.pos.y - nextY) * self.dir.y
+            yStep = -1
+
+        else: # looking down
+            stepY = 1
+            nextY = int(self.pos.y) + 1
+            yDist = (nextY - self.pos.y) * self.dir.y
+            yStep = 1
+
+            

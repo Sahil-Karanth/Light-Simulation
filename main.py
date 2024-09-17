@@ -1,5 +1,5 @@
 import pygame
-from classes import Player, Vector
+from classes import Player, Vector, Ray
 
 # Define the game map
 game_map = [
@@ -39,14 +39,22 @@ while running:
 
     # Handle player movement
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_UP]:
+    # USE WASD
+
+
+    if keys[pygame.K_w]:
         player.move(Vector([0, -MOVEMENT_SPEED]))
-    if keys[pygame.K_DOWN]:
+    if keys[pygame.K_s]:
         player.move(Vector([0, MOVEMENT_SPEED]))
-    if keys[pygame.K_LEFT]:
+    if keys[pygame.K_a]:
         player.move(Vector([-MOVEMENT_SPEED, 0]))
-    if keys[pygame.K_RIGHT]:
+    if keys[pygame.K_d]:
         player.move(Vector([MOVEMENT_SPEED, 0]))
+
+
+    mouse_pos = pygame.mouse.get_pos()
+
+    player.dir = Vector([mouse_pos[0] - player.pos.x * CELL_SIZE, mouse_pos[1] - player.pos.y * CELL_SIZE]).normalise()
 
     # Clear the screen
     screen.fill((0, 0, 0))
@@ -57,8 +65,15 @@ while running:
             if cell:
                 pygame.draw.rect(screen, (255, 255, 255), (x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
     
-    # Draw player
+    # Draw player whose size is relative to the map
     pygame.draw.circle(screen, (255, 0, 0), (int(player.pos.x * CELL_SIZE), int(player.pos.y * CELL_SIZE)), 5)
+
+    # draw player direction
+    pygame.draw.line(screen, (0, 255, 0), (player.pos.x * CELL_SIZE, player.pos.y * CELL_SIZE), (player.pos.x * CELL_SIZE + player.dir.x * CELL_SIZE, player.pos.y * CELL_SIZE + player.dir.y * CELL_SIZE), 2)
+
+    # ray cast
+    ray = Ray([player.pos.x, player.pos.y], [player.dir.x, player.dir.y])
+    # ray.cast(game_map, screen, CELL_SIZE)
 
     # Update the display
     pygame.display.flip()
