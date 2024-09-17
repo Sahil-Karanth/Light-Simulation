@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 class Vector:
     def __init__(self, lst):
@@ -38,12 +39,15 @@ class Vector:
         if mag == 0:
             return ValueError("Cannot normalise the zero vector.")
         return self / mag
+    
+    def rotate(self, angle):
+        return Vector([self.x * math.cos(angle) - self.y * math.sin(angle), self.x * math.sin(angle) + self.y * math.cos(angle)])
 
 class Player:
     def __init__(self, pos, dir):
         self.pos = Vector(pos)
         self.dir = Vector(dir).normalise()
-        self.fov = 60
+        self.fov = np.pi/3
 
     def move(self, dir):
         self.pos += dir
@@ -55,6 +59,17 @@ class Ray:
 
     def __str__(self):
         return f"r = {self.pos.values} + t{self.dir.values}"
+
+    @staticmethod
+    def sendRays(player, map):
+        hit_lst = []
+        for angle in np.linspace(-player.fov/2, player.fov/2, 20):
+            ray = Ray(player.pos, player.dir.rotate(angle))
+            hit = ray.cast(map)
+            if hit:
+                hit_lst.append(hit)
+
+        return hit_lst
 
     def cast(self, map, max_dist=20):
         current_pos = Vector([self.pos.x, self.pos.y])

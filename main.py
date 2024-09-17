@@ -1,6 +1,7 @@
 import pygame
 from classes import Player, Vector, Ray
 import random
+import numpy as np
 
 # Define the game map
 game_map = [
@@ -74,15 +75,12 @@ while running:
     # draw player direction
     pygame.draw.line(screen, (0, 255, 0), (player.pos.x * CELL_SIZE, player.pos.y * CELL_SIZE), (player.pos.x * CELL_SIZE + player.dir.x * CELL_SIZE, player.pos.y * CELL_SIZE + player.dir.y * CELL_SIZE), 2)
 
-    # ray cast just one ray for now ina the direction of the player
-    ray = Ray(player.pos, player.dir)
-    hit = ray.cast(game_map)
-    if hit:
+    hit_lst = Ray.sendRays(player, game_map)
+
+    for hit in hit_lst:
         pygame.draw.circle(screen, (0, 0, 255), (int(hit.x * CELL_SIZE), int(hit.y * CELL_SIZE)), 5)
         pygame.draw.line(screen, (0, 0, 255), (player.pos.x * CELL_SIZE, player.pos.y * CELL_SIZE), (hit.x * CELL_SIZE, hit.y * CELL_SIZE), 2)
-
-    # randomly shuffle the rows in the map
-
+    
     # Update the display
     pygame.display.flip()
     
