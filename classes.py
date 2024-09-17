@@ -49,24 +49,56 @@ class Player:
 class Ray:
 
     def __init__(self, pos, dir):
-        self.pos = Vector(pos)
-        self.dir = Vector(dir).normalise()
+        self.pos = pos
+        self.dir = dir.normalise()
 
     def __str__(self):
         return f"r = {self.pos.values} + t{self.dir.values}"
 
-    def cast(self, map):
+    def cast(self, map, max_dist=20):
 
+        if max_dist == 0:
+            return None
+            
         if self.dir.dotProd(Vector([0, 1])) > 0: # looking up
-            stepY = -1
-            nextY = int(self.pos.y)
-            yDist = (self.pos.y - nextY) * self.dir.y
-            yStep = -1
+            # move up to the next horizontal line
+            to_next_y = (int(self.pos.y) + 1 - self.pos.y) / self.dir.y
+            x_step = 1 / self.dir.y * self.dir.x
 
         else: # looking down
-            stepY = 1
-            nextY = int(self.pos.y) + 1
-            yDist = (nextY - self.pos.y) * self.dir.y
-            yStep = 1
+            # move down to the next horizontal line
+            to_next_y = (int(self.pos.y) - self.pos.y) / self.dir.y
+            x_step = 1 / self.dir.y * self.dir.x
+        
+        if self.dir.dotProd(Vector([1, 0])) > 0: # looking right
+            # move right to the next vertical line
+            to_next_x = (int(self.pos.x) + 1 - self.pos.x) / self.dir.x
+            y_step = 1 / self.dir.x * self.dir.y
+        
+        else: # looking left
+            # move left to the next vertical line
+            to_next_x = (int(self.pos.x) - self.pos.x) / self.dir.x
+            y_step = 1 / self.dir.x * self.dir.y
 
+        
+        while max_dist > 0:
+            if to_next_y < to_next_x:
+                self.pos += Vector([0, to_next_y])
+                to_next_x -= to_next_y
+                to_next_y = 1
+            else:
+                self.pos += Vector([to_next_x, 0])
+                to_next_y -= to_next_x
+                to_next_x = 1
+
+            max_dist -= 1
+
+            if map[int(self.pos.y)][int(self.pos.x)]:
+                return self.pos
             
+        
+        
+  
+        
+        
+

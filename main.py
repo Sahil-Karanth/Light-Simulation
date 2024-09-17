@@ -71,13 +71,16 @@ while running:
     # draw player direction
     pygame.draw.line(screen, (0, 255, 0), (player.pos.x * CELL_SIZE, player.pos.y * CELL_SIZE), (player.pos.x * CELL_SIZE + player.dir.x * CELL_SIZE, player.pos.y * CELL_SIZE + player.dir.y * CELL_SIZE), 2)
 
-    # ray cast
-    ray = Ray([player.pos.x, player.pos.y], [player.dir.x, player.dir.y])
-    # ray.cast(game_map, screen, CELL_SIZE)
+    # ray cast just one ray for now ina the direction of the player
+    ray = Ray(player.pos, player.dir)
+    hit = ray.cast(game_map)
+    if hit:
+        pygame.draw.circle(screen, (0, 0, 255), (int(hit.x * CELL_SIZE), int(hit.y * CELL_SIZE)), 5)
+        pygame.draw.line(screen, (0, 0, 255), (player.pos.x * CELL_SIZE, player.pos.y * CELL_SIZE), (hit.x * CELL_SIZE, hit.y * CELL_SIZE), 2)
 
     # Update the display
     pygame.display.flip()
     
-    pygame.time.Clock().tick(60)  # Cap the frame rate
+    pygame.time.Clock().tick(60)  # Cap the frame ratews
 
 pygame.quit()
