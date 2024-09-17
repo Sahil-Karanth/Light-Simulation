@@ -4,7 +4,6 @@ class Vector:
         self.values = list(lst)
         self.x = self.values[0]
         self.y = self.values[1]
-        self.z = self.values[2]
         self.ndim = len(lst)
 
     def __add__(self, vec2):
@@ -40,6 +39,11 @@ class Player:
     def __init__(self, pos, dir):
         self.pos = Vector(pos)
         self.dir = Vector(dir).normalise()
+        self.fov = 60
+
+    def move(self, dir):
+        # dir is a vector
+        self.pos += dir
 
 
 class Ray:
@@ -48,5 +52,9 @@ class Ray:
         self.pos = Vector(pos)
         self.dir = Vector(dir).normalise()
 
+    def __str__(self):
+        return f"r = {self.pos.values} + t{self.dir.values}"
+
     def cast(self, map):
+
         pass
