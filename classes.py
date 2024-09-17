@@ -1,9 +1,10 @@
-class Vector:
+import math
 
+class Vector:
     def __init__(self, lst):
         self.values = list(lst)
-        self.x = self.values[0]
-        self.y = self.values[1]
+        self.x = lst[0]
+        self.y = lst[1]
         self.ndim = len(lst)
 
     def __add__(self, vec2):
@@ -19,6 +20,8 @@ class Vector:
         return self.__mul__(scalar)
 
     def __truediv__(self, scalar):
+        if scalar == 0:
+            raise ValueError("Cannot divide by zero.")
         return Vector([a / scalar for a in self.values])
 
     def __str__(self):
@@ -28,26 +31,24 @@ class Vector:
         return sum([a * b for a, b in zip(self.values, vec2.values)])
 
     def magnitude(self):
-        return sum([a**2 for a in self.values]) ** 0.5
+        return math.sqrt(sum([a**2 for a in self.values]))
 
     def normalise(self):
-        return self / self.magnitude()
-
+        mag = self.magnitude()
+        if mag == 0:
+            return ValueError("Cannot normalise the zero vector.")
+        return self / mag
 
 class Player:
-
     def __init__(self, pos, dir):
         self.pos = Vector(pos)
         self.dir = Vector(dir).normalise()
         self.fov = 60
 
     def move(self, dir):
-        # dir is a vector
         self.pos += dir
 
-
 class Ray:
-
     def __init__(self, pos, dir):
         self.pos = pos
         self.dir = dir.normalise()
@@ -56,49 +57,31 @@ class Ray:
         return f"r = {self.pos.values} + t{self.dir.values}"
 
     def cast(self, map, max_dist=20):
+        current_pos = Vector([self.pos.x, self.pos.y])
 
-        if max_dist == 0:
-            return None
-            
-        if self.dir.dotProd(Vector([0, 1])) > 0: # looking up
-            # move up to the next horizontal line
-            to_next_y = (int(self.pos.y) + 1 - self.pos.y) / self.dir.y
-            x_step = 1 / self.dir.y * self.dir.x
+        # Calculate the step size and initial ray steps (DDA algorithm)
+        delta_dist_x = abs(1 / self.dir.x) if self.dir.x != 0 else float('inf')
+        delta_dist_y = abs(1 / self.dir.y) if self.dir.y != 0 else float('inf')
 
-        else: # looking down
-            # move down to the next horizontal line
-            to_next_y = (int(self.pos.y) - self.pos.y) / self.dir.y
-            x_step = 1 / self.dir.y * self.dir.x
-        
-        if self.dir.dotProd(Vector([1, 0])) > 0: # looking right
-            # move right to the next vertical line
-            to_next_x = (int(self.pos.x) + 1 - self.pos.x) / self.dir.x
-            y_step = 1 / self.dir.x * self.dir.y
-        
-        else: # looking left
-            # move left to the next vertical line
-            to_next_x = (int(self.pos.x) - self.pos.x) / self.dir.x
-            y_step = 1 / self.dir.x * self.dir.y
+        step_x = 1 if self.dir.x > 0 else -1
+        step_y = 1 if self.dir.y > 0 else -1
 
-        
+        side_dist_x = (math.ceil(self.pos.x) - self.pos.x) * delta_dist_x if step_x > 0 else (self.pos.x - math.floor(self.pos.x)) * delta_dist_x
+        side_dist_y = (math.ceil(self.pos.y) - self.pos.y) * delta_dist_y if step_y > 0 else (self.pos.y - math.floor(self.pos.y)) * delta_dist_y
+
+        # DDA loop to step through grid cells
         while max_dist > 0:
-            if to_next_y < to_next_x:
-                self.pos += Vector([0, to_next_y])
-                to_next_x -= to_next_y
-                to_next_y = 1
+            if side_dist_x < side_dist_y:
+                side_dist_x += delta_dist_x
+                current_pos.x += step_x
             else:
-                self.pos += Vector([to_next_x, 0])
-                to_next_y -= to_next_x
-                to_next_x = 1
+                side_dist_y += delta_dist_y
+                current_pos.y += step_y
 
             max_dist -= 1
 
-            if map[int(self.pos.y)][int(self.pos.x)]:
-                return self.pos
-            
-        
-        
-  
-        
-        
+            # Check if we hit a wall
+            if map[int(current_pos.y)][int(current_pos.x)]:
+                return current_pos  # Return the hit position
 
+        return None  # No collision within max_dist
