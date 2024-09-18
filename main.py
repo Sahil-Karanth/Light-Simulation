@@ -27,7 +27,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Raycasting")
 
 # Define movement speed
-MOVEMENT_SPEED = 0.15
+MOVEMENT_SPEED = 0.1
 
 # Create player instance
 player = Player([4.5, 4.5], [1, 0])
@@ -41,21 +41,27 @@ while running:
 
     # Handle player movement
     keys = pygame.key.get_pressed()
-    # USE WASD
 
-    if game_map[int(player.pos.y)][int(player.pos.x)] == 1:
-        player.pos = Vector([5,5])
 
     if keys[pygame.K_w]:
-        player.move(Vector([0, -MOVEMENT_SPEED]))
-    if keys[pygame.K_s]:
-        player.move(Vector([0, MOVEMENT_SPEED]))
-    if keys[pygame.K_a]:
-        player.move(Vector([-MOVEMENT_SPEED, 0]))
-    if keys[pygame.K_d]:
-        player.move(Vector([MOVEMENT_SPEED, 0]))
+        next_move = Vector([0, -MOVEMENT_SPEED])
+    elif keys[pygame.K_s]:
+        next_move = Vector([0, MOVEMENT_SPEED])
+    elif keys[pygame.K_a]:
+        next_move = Vector([-MOVEMENT_SPEED, 0])
+    elif keys[pygame.K_d]:
+        next_move = Vector([MOVEMENT_SPEED, 0])
+    else:
+        next_move = Vector([0, 0])
 
+    simulate_next_pos = player.pos + next_move
 
+    # Check if the next position is a wall
+    if game_map[int(simulate_next_pos.y)][int(simulate_next_pos.x)]:
+        continue
+
+    player.pos += next_move
+    
     mouse_pos = pygame.mouse.get_pos()
 
     player.dir = Vector([mouse_pos[0] - player.pos.x * CELL_SIZE, mouse_pos[1] - player.pos.y * CELL_SIZE]).normalise()
@@ -77,6 +83,7 @@ while running:
     pygame.draw.line(screen, (0, 255, 0), (player.pos.x * CELL_SIZE, player.pos.y * CELL_SIZE), (player.pos.x * CELL_SIZE + player.dir.x * CELL_SIZE, player.pos.y * CELL_SIZE + player.dir.y * CELL_SIZE), 2)
 
     hit_lst = Ray.sendRays(player, game_map, "primitive")
+    # print([i.__str__() for i in hit_lst])
 
     for hit in hit_lst:
         pygame.draw.circle(screen, (0, 0, 255), (int(hit.x * CELL_SIZE), int(hit.y * CELL_SIZE)), 5)
@@ -85,9 +92,8 @@ while running:
         # calculate distance
         distance = Vector([hit.x - player.pos.x, hit.y - player.pos.y]).magnitude() * CELL_SIZE
 
-        # print(distance)
     # Update the display
-    pygame.display.flip()
+    pygame.display.flip() 
     
     pygame.time.Clock().tick(60)  # Cap the frame rate
 
