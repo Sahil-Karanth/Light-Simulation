@@ -72,7 +72,7 @@ class Ray:
     @staticmethod
     def sendRays(player, map, cast_type):
         hit_lst = []
-        for angle in np.linspace(-player.fov / 2, player.fov / 2, 70):
+        for angle in np.linspace(-player.fov / 2, player.fov / 2, 100):
             ray = Ray(player.pos, player.dir.rotate(angle))
 
             if cast_type == "primitive":
@@ -124,15 +124,17 @@ class Ray:
 
         return None  # No collision within max_dist
 
-    def cast_primitive(self, map, max_dist=20):
+    def cast_primitive(self, map, max_iter=500):
 
         current_pos = Vector([self.pos.x, self.pos.y])
 
         increment_vector = self.dir * 0.1
 
-        while True:
+        while max_iter > 0:
 
             current_pos += increment_vector
 
             if map[int(current_pos.y)][int(current_pos.x)]:
                 return current_pos
+            
+            max_iter -= 1

@@ -21,7 +21,7 @@ game_map = [
 
 pygame.init()
 
-SCREEN_WIDTH = 600
+SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 600
 CELL_SIZE = 60
 
@@ -32,7 +32,7 @@ pygame.display.set_caption("Raycasting")
 MOVEMENT_SPEED = 0.1
 
 # Create player instance
-player = Player([4.5, 4.5], [1, 0])
+player = Player([4.5, 4.5], [0, -1])
 
 # Main game loop
 running = True
@@ -55,11 +55,10 @@ while running:
     else:
         next_move = Vector([0, 0])
 
-    # use arrow keys to rotate
-    # if keys[pygame.K_LEFT]:
-    #     player.dir = player.dir.rotate(-0.1)
-    # elif keys[pygame.K_RIGHT]:
-    #     player.dir = player.dir.rotate(0.1)
+    if keys[pygame.K_LEFT]:
+        player.dir = player.dir.rotate(-0.1)
+    elif keys[pygame.K_RIGHT]:
+        player.dir = player.dir.rotate(0.1)
 
     simulate_next_pos = player.pos + next_move
 
@@ -67,16 +66,7 @@ while running:
     if game_map[int(simulate_next_pos.y)][int(simulate_next_pos.x)]:
         continue
 
-    player.pos += next_move
-
-    mouse_pos = Vector(list(pygame.mouse.get_pos()))
-
-    player.dir = Vector(
-        [
-            mouse_pos.x - player.pos.x * CELL_SIZE,
-            mouse_pos.y - player.pos.y * CELL_SIZE,
-        ]
-    ).normalise()
+    player.pos += next_move 
 
     # Clear the screen
     screen.fill((0, 0, 0))
@@ -85,13 +75,23 @@ while running:
 
     for hit in hit_lst:
 
-        line_height = 1/(hit.x) * SCREEN_HEIGHT
+        # Calculate the distance to the hit
+        distance = (
+            Vector([hit.x - player.pos.x, hit.y - player.pos.y]).magnitude() * CELL_SIZE
+        )
+        # Calculate the wall height
+        wall_height = 1 / distance * 100
 
+        # Calculate the wall color
+        color = (255, 255, 255)
+
+        # Draw the wall
         pygame.draw.line(
             screen,
-            (255, 255, 255),
-            (hit.x * CELL_SIZE, SCREEN_HEIGHT / 2 - line_height / 2),
-            (hit.x * CELL_SIZE, SCREEN_HEIGHT / 2 + line_height / 2),
+            color,
+            (hit.x * CELL_SIZE, hit.y * CELL_SIZE),
+            (hit.x * CELL_SIZE, hit.y * CELL_SIZE + wall_height * SCREEN_HEIGHT),
+            1,
         )
 
     pygame.display.flip()

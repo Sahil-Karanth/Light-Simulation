@@ -4,35 +4,24 @@ import numpy as np
 import pygame
 
 from classes import Player, Ray, Vector
+from values import Values
 
-# Define the game map
-game_map = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 0, 0, 1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-]
+def load_map(file):
+    with open(file, "r") as file:
+        return [[int(cell) for cell in line if cell != "\n"] for line in file]
+
+game_map = load_map("map.txt")
 
 pygame.init()
 
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 600
-CELL_SIZE = 60
-
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen = pygame.display.set_mode((Values.SCREEN_WIDTH, Values.SCREEN_HEIGHT))
 pygame.display.set_caption("Raycasting")
 
 # Define movement speed
-MOVEMENT_SPEED = 0.1
+MOVEMENT_SPEED = 1
 
 # Create player instance
-player = Player([4.5, 4.5], [1, 0])
+player = Player([4.5, 4.5], [0, -1])
 
 # Main game loop
 running = True
@@ -55,6 +44,11 @@ while running:
     else:
         next_move = Vector([0, 0])
 
+    if keys[pygame.K_LEFT]:
+        player.dir = player.dir.rotate(-0.1)
+    elif keys[pygame.K_RIGHT]:
+        player.dir = player.dir.rotate(0.1)
+
     simulate_next_pos = player.pos + next_move
 
     # Check if the next position is a wall
@@ -63,15 +57,6 @@ while running:
 
     player.pos += next_move
 
-    mouse_pos = pygame.mouse.get_pos()
-    print(mouse_pos)
-
-    player.dir = Vector(
-        [
-            mouse_pos[0] - player.pos.x * CELL_SIZE,
-            mouse_pos[1] - player.pos.y * CELL_SIZE,
-        ]
-    ).normalise()
 
     # Clear the screen
     screen.fill((0, 0, 0))
@@ -84,7 +69,7 @@ while running:
                 pygame.draw.rect(
                     screen,
                     (255, 255, 255),
-                    (x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE),
+                    (x * Values.CELL_SIZE, y * Values.CELL_SIZE, Values.CELL_SIZE, Values.CELL_SIZE),
                     1,
                 )
 
@@ -92,40 +77,28 @@ while running:
     pygame.draw.circle(
         screen,
         (255, 0, 0),
-        (int(player.pos.x * CELL_SIZE), int(player.pos.y * CELL_SIZE)),
-        5,
+        (int(player.pos.x * Values.CELL_SIZE), int(player.pos.y * Values.CELL_SIZE)),
+        10,
     )
 
-    # draw player direction
-    pygame.draw.line(
-        screen,
-        (0, 255, 0),
-        (player.pos.x * CELL_SIZE, player.pos.y * CELL_SIZE),
-        (
-            player.pos.x * CELL_SIZE + player.dir.x * CELL_SIZE,
-            player.pos.y * CELL_SIZE + player.dir.y * CELL_SIZE,
-        ),
-        2,
-    )
 
     hit_lst = Ray.sendRays(player, game_map, "primitive")
-    # print([i.__str__() for i in hit_lst])
 
     for hit in hit_lst:
         pygame.draw.circle(
-            screen, (0, 0, 255), (int(hit.x * CELL_SIZE), int(hit.y * CELL_SIZE)), 5
+            screen, (0, 0, 255), (int(hit.x * Values.CELL_SIZE), int(hit.y * Values.CELL_SIZE)), 1
         )
         pygame.draw.line(
             screen,
             (0, 0, 255),
-            (player.pos.x * CELL_SIZE, player.pos.y * CELL_SIZE),
-            (hit.x * CELL_SIZE, hit.y * CELL_SIZE),
+            (player.pos.x * Values.CELL_SIZE, player.pos.y * Values.CELL_SIZE),
+            (hit.x * Values.CELL_SIZE, hit.y * Values.CELL_SIZE),
             2,
         )
 
         # calculate distance
         distance = (
-            Vector([hit.x - player.pos.x, hit.y - player.pos.y]).magnitude() * CELL_SIZE
+            Vector([hit.x - player.pos.x, hit.y - player.pos.y]).magnitude() * Values.CELL_SIZE
         )
 
     # exit()
