@@ -19,9 +19,9 @@ game_map = [
 
 pygame.init()
 
-SCREEN_WIDTH = 400
-SCREEN_HEIGHT = 400
-CELL_SIZE = 40
+SCREEN_WIDTH = 600
+SCREEN_HEIGHT = 600
+CELL_SIZE = 60
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Raycasting")
@@ -67,7 +67,8 @@ while running:
     for y, row in enumerate(game_map):
         for x, cell in enumerate(row):
             if cell:
-                pygame.draw.rect(screen, (255, 255, 255), (x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+                # outline the cell with a line
+                pygame.draw.rect(screen, (255, 255, 255), (x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE), 1)
     
     # Draw player whose size is relative to the map
     pygame.draw.circle(screen, (255, 0, 0), (int(player.pos.x * CELL_SIZE), int(player.pos.y * CELL_SIZE)), 5)
@@ -75,15 +76,21 @@ while running:
     # draw player direction
     pygame.draw.line(screen, (0, 255, 0), (player.pos.x * CELL_SIZE, player.pos.y * CELL_SIZE), (player.pos.x * CELL_SIZE + player.dir.x * CELL_SIZE, player.pos.y * CELL_SIZE + player.dir.y * CELL_SIZE), 2)
 
-    hit_lst = Ray.sendRays(player, game_map)
+    hit_lst = Ray.sendRays(player, game_map, "primitive")
 
     for hit in hit_lst:
         pygame.draw.circle(screen, (0, 0, 255), (int(hit.x * CELL_SIZE), int(hit.y * CELL_SIZE)), 5)
         pygame.draw.line(screen, (0, 0, 255), (player.pos.x * CELL_SIZE, player.pos.y * CELL_SIZE), (hit.x * CELL_SIZE, hit.y * CELL_SIZE), 2)
     
+        # calculate distance
+        distance = Vector([hit.x - player.pos.x, hit.y - player.pos.y]).magnitude() * CELL_SIZE
+
+        # print(distance)
     # Update the display
     pygame.display.flip()
     
     pygame.time.Clock().tick(60)  # Cap the frame rate
+
+
 
 pygame.quit()
