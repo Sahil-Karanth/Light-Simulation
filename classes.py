@@ -49,7 +49,9 @@ class Vector:
                 self.x * math.sin(angle) + self.y * math.cos(angle),
             ]
         )
-
+    
+    def reflect(self, mirror_line):
+        pass
 
 class Player:
     def __init__(self, pos, dir):
@@ -72,7 +74,7 @@ class Ray:
     @staticmethod
     def sendRays(player, map, cast_type):
         hit_lst = []
-        for angle in np.linspace(-player.fov / 2, player.fov / 2, 100):
+        for angle in np.linspace(-player.fov / 2, player.fov / 2, 1):
             ray = Ray(player.pos, player.dir.rotate(angle))
 
             if cast_type == "primitive":
@@ -124,7 +126,7 @@ class Ray:
 
         return None  # No collision within max_dist
 
-    def cast_primitive(self, map, max_iter=500):
+    def cast_primitive(self, map, max_iter=1000):
 
         current_pos = Vector([self.pos.x, self.pos.y])
 
