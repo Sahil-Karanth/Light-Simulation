@@ -72,10 +72,8 @@ class Ray:
     @staticmethod
     def sendRays(player, map, cast_type):
         hit_lst = []
-        for angle in np.linspace(-player.fov / 2, player.fov / 2, 50):
-            print(angle)
+        for angle in np.linspace(-player.fov / 2, player.fov / 2, 70):
             ray = Ray(player.pos, player.dir.rotate(angle))
-            print(ray)
 
             if cast_type == "primitive":
                 hit = ray.cast_primitive(map)
@@ -83,7 +81,7 @@ class Ray:
                 hit = ray.cast_dda(map)
             else:
                 raise ValueError("Invalid cast type.")
-            
+
             if hit:
                 hit_lst.append(hit)
         return hit_lst
@@ -129,7 +127,6 @@ class Ray:
     def cast_primitive(self, map, max_dist=20):
 
         current_pos = Vector([self.pos.x, self.pos.y])
-
 
         increment_vector = self.dir * 0.1
 
