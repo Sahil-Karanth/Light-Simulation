@@ -66,12 +66,12 @@ while running:
     if game_map[int(simulate_next_pos.y)][int(simulate_next_pos.x)]:
         continue
 
-    player.pos += next_move 
+    player.pos += next_move
 
     # Clear the screen
     screen.fill((0, 0, 0))
 
-    hit_lst = Ray.sendRays(player, game_map, "primitive")
+    hit_lst = Ray.initialRayCast(player, game_map, "primitive")
 
     for hit in hit_lst:
 

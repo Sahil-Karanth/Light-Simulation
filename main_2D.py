@@ -35,19 +35,19 @@ def draw_player(screen, player):
     )
 
 
-def draw_ray(screen, player, hit):
+def draw_ray(screen, player, hit, colour=(0, 0, 255)):
 
     pygame.draw.circle(
         screen,
-        (0, 0, 255),
-        (int(hit.x * Values.CELL_SIZE), int(hit.y * Values.CELL_SIZE)),
+        colour,
+        (int(hit.pos.x * Values.CELL_SIZE), int(hit.pos.y * Values.CELL_SIZE)),
         1,
     )
     pygame.draw.line(
         screen,
-        (0, 0, 255),
+        colour,
         (player.pos.x * Values.CELL_SIZE, player.pos.y * Values.CELL_SIZE),
-        (hit.x * Values.CELL_SIZE, hit.y * Values.CELL_SIZE),
+        (hit.pos.x * Values.CELL_SIZE, hit.pos.y * Values.CELL_SIZE),
         2,
     )
 
@@ -67,12 +67,13 @@ def get_wasd_move(keys):
 
     return next_move
 
+
 def update_player_rotation(keys, player):
 
     if keys[pygame.K_LEFT]:
-        player.dir = player.dir.rotate(-0.1)
+        player.dir = player.dir.rotate(-0.05)
     elif keys[pygame.K_RIGHT]:
-        player.dir = player.dir.rotate(0.1)
+        player.dir = player.dir.rotate(0.05)
 
 
 def draw_map(screen, game_map):
@@ -80,6 +81,7 @@ def draw_map(screen, game_map):
         for x, cell in enumerate(row):
             if cell:
                 draw_grid_cell(screen, x, y)
+
 
 def main():
 
@@ -102,7 +104,9 @@ def main():
 
         next_move = get_wasd_move(keys)
 
-        update_player_rotation(keys, player)
+        # update_player_rotation(keys, player)
+        mouse_pos = pygame.mouse.get_pos()
+        player.dir = Vector([mouse_pos[0] - player.pos.x * Values.CELL_SIZE, mouse_pos[1] - player.pos.y * Values.CELL_SIZE]).normalise()
 
         simulate_next_pos = player.pos + next_move
 
@@ -118,16 +122,44 @@ def main():
 
         draw_player(screen, player)
 
-        hit_lst = Ray.sendRays(player, game_map, "primitive")
+        hit_lst = Ray.initialRayCast(player, game_map, "primitive")
         for hit in hit_lst:
+
             draw_ray(screen, player, hit)
 
-            distance = (
-                Vector([hit.x - player.pos.x, hit.y - player.pos.y]).magnitude()
-                * Values.CELL_SIZE
-            )
+            if hit.wall_orientation == "vertical":
+                print("vertical wall")
 
-            # print(f"Hit at {hit.values} which corresponds to the cell {hit.values}")
+                new_ray = Ray(hit.pos, Vector([hit.ray.dir.x, hit.ray.dir.y * -1]))
+
+                # new_ray.send_reflected_ray(hit)
+                new_hit = new_ray.cast(game_map, "primitive")
+
+                pygame.draw.line(
+                    screen,
+                    (0, 255, 0),
+                    (new_ray.pos.x * Values.CELL_SIZE, new_ray.pos.y * Values.CELL_SIZE),
+                    (new_hit.pos.x * Values.CELL_SIZE, new_hit.pos.y * Values.CELL_SIZE),
+                    5,
+                )
+
+            elif hit.wall_orientation == "horizontal":
+                print("horizontal wall")
+
+                new_ray = Ray(hit.pos, Vector([hit.ray.dir.x * -1, hit.ray.dir.y]))
+
+                # new_ray.send_reflected_ray(hit)
+                new_hit = new_ray.cast(game_map, "primitive")
+
+                pygame.draw.line(
+                    screen,
+                    (0, 255, 0),
+                    (new_ray.pos.x * Values.CELL_SIZE, new_ray.pos.y * Values.CELL_SIZE),
+                    (new_hit.pos.x * Values.CELL_SIZE, new_hit.pos.y * Values.CELL_SIZE),
+                    5,
+                )
+
+
 
         pygame.display.flip()
         pygame.time.Clock().tick(60)

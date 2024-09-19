@@ -1,6 +1,6 @@
 import math
-
 import numpy as np
+from values import Values
 
 
 class Vector:
@@ -49,9 +49,7 @@ class Vector:
                 self.x * math.sin(angle) + self.y * math.cos(angle),
             ]
         )
-    
-    def reflect(self, mirror_line):
-        pass
+
 
 class Player:
     def __init__(self, pos, dir):
@@ -72,9 +70,9 @@ class Ray:
         return f"r = {self.pos.values} + t{self.dir.values}"
 
     @staticmethod
-    def sendRays(player, map, cast_type):
+    def initialRayCast(player, map, cast_type):
         hit_lst = []
-        for angle in np.linspace(-player.fov / 2, player.fov / 2, 1):
+        for angle in np.linspace(-player.fov / 2, player.fov / 2, Values.NUM_RAYS):
             ray = Ray(player.pos, player.dir.rotate(angle))
 
             if cast_type == "primitive":
@@ -135,19 +133,43 @@ class Ray:
         while max_iter > 0:
 
             current_pos += increment_vector
-            prev_pos = current_pos - increment_vector                
+            prev_pos = current_pos - increment_vector
 
             if map[int(current_pos.y)][int(current_pos.x)]:
 
-                # print(f"{int(current_pos.y)} {int(current_pos.x)}")
-
-                if int(current_pos.x) != int(prev_pos.x):
-                    print("intersected with a vertical wall")
+                hit_wall_orientation = None
+                if int(current_pos.x) != int(prev_pos.x): # crossed vertical so wall is horizontal
+                    hit_wall_orientation = "horizontal"
 
                 elif int(current_pos.y) != int(prev_pos.y):
-                    print("intersected with a horizontal wall")
+                    hit_wall_orientation = "vertical"
 
+                return Hit(current_pos, self, hit_wall_orientation)
 
-                return current_pos
-            
             max_iter -= 1
+
+    # def send_reflected_ray(self, hit):
+
+    #     if hit.wall_orientation == "vertical":
+    #         reflected_ray_dir = Vector([self.dir.x, self.dir.y * -1])
+    #     else:
+    #         reflected_ray_dir = Vector([self.dir.x, self.dir.y * -1])
+
+    #     reflected_ray = Ray(hit.pos, reflected_ray_dir)
+
+    #     return reflected_ray
+
+
+    def cast(self, game_map, cast_type):
+        if cast_type == "primitive":
+            return self.cast_primitive(game_map)
+        elif cast_type == "dda":
+            return self.cast_dda(game_map)
+        else:
+            raise ValueError("Invalid cast type.")
+
+class Hit:
+    def __init__(self, pos, ray, hit_wall_orientation):
+        self.pos = pos
+        self.wall_orientation = hit_wall_orientation
+        self.ray = ray
