@@ -1,4 +1,5 @@
 import random
+from copy import deepcopy
 
 import numpy as np
 import pygame
@@ -25,6 +26,29 @@ def draw_grid_cell(screen, x, y):
         1,
     )
 
+
+def check_for_map_changes(game_map, mouse_pos):
+
+    loc = [
+        int(mouse_pos[0] / Values.CELL_SIZE),
+        int(mouse_pos[1] / Values.CELL_SIZE),
+    ]
+
+    if pygame.mouse.get_pressed()[0]:
+
+        if game_map[loc[1]][loc[0]] == 0:
+            game_map[loc[1]][loc[0]] = 1
+
+    # if you right click on the screen, it will remove a wall
+    if pygame.mouse.get_pressed()[2]:
+
+        loc = [
+            int(mouse_pos[0] / Values.CELL_SIZE),
+            int(mouse_pos[1] / Values.CELL_SIZE),
+        ]
+
+        if game_map[loc[1]][loc[0]] == 1:
+            game_map[loc[1]][loc[0]] = 0
 
 def draw_player(screen, player):
     pygame.draw.circle(
@@ -54,7 +78,7 @@ def draw_fading_ray(
     screen,
     start_vec,
     end_vec,
-    colour=(0, 0, 255),
+    colour=(255, 204, 0),
     alpha_start=255,
     alpha_end=0,
     segments=50,
@@ -125,6 +149,18 @@ def draw_map(screen, game_map):
             if cell:
                 draw_grid_cell(screen, x, y)
 
+            # else:
+            #     pygame.draw.rect(
+            #         screen,
+            #         (0, 0, 0),
+            #         (
+            #             x * Values.CELL_SIZE,
+            #             y * Values.CELL_SIZE,
+            #             Values.CELL_SIZE,
+            #             Values.CELL_SIZE,
+            #         ),
+            #     )
+
 
 def main():
 
@@ -145,11 +181,32 @@ def main():
 
         # Handle player movement
         keys = pygame.key.get_pressed()
+        mouse_pos = pygame.mouse.get_pos()
 
         next_move = get_wasd_move(keys)
 
+        # if q to toggle Value.NUM_RAYS on and off
+        q_pressed = False
+        if keys[pygame.K_q]:
+
+            if q_pressed:
+                q_pressed = False
+                continue
+
+            if Values.NUM_RAYS == 0:
+                print("setting back to original value which is: ", num_rays_copy)
+                Values.NUM_RAYS = num_rays_copy
+
+            else:
+
+                num_rays_copy = deepcopy(Values.NUM_RAYS)
+                Values.NUM_RAYS = 0
+
+            q_pressed = True
+
+        check_for_map_changes(game_map, mouse_pos)
+
         # update_player_rotation(keys, player)
-        mouse_pos = pygame.mouse.get_pos()
         player.dir = Vector(
             [
                 mouse_pos[0] - player.pos.x * Values.CELL_SIZE,

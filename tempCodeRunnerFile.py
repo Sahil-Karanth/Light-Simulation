@@ -1,1 +1,3 @@
-, segments=50)
+
+
+            if Values.NUM_RAYS == 0:
