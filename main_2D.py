@@ -35,10 +35,10 @@ def draw_player(screen, player):
     )
 
 
-def draw_ray(screen, start_vec, end_vec, colour=(0, 0, 255), alpha=255):
+def draw_ray(screen, start_vec, end_vec, colour=(255, 255, 0), alpha=255):
 
     ray_surface = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-    
+
     pygame.draw.line(
         ray_surface,
         (*colour, alpha),
@@ -46,9 +46,53 @@ def draw_ray(screen, start_vec, end_vec, colour=(0, 0, 255), alpha=255):
         (end_vec.x * Values.CELL_SIZE, end_vec.y * Values.CELL_SIZE),
         5,
     )
-    
+
     screen.blit(ray_surface, (0, 0))
 
+
+def draw_fading_ray(
+    screen,
+    start_vec,
+    end_vec,
+    colour=(0, 0, 255),
+    alpha_start=255,
+    alpha_end=0,
+    segments=50,
+):
+    # Create a transparent surface
+    ray_surface = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+
+    # Get start and end positions in pixel space
+    start_pos = (start_vec.x * Values.CELL_SIZE, start_vec.y * Values.CELL_SIZE)
+    end_pos = (end_vec.x * Values.CELL_SIZE, end_vec.y * Values.CELL_SIZE)
+
+    # Calculate the difference between the start and end positions
+    delta_x = (end_pos[0] - start_pos[0]) / segments
+    delta_y = (end_pos[1] - start_pos[1]) / segments
+
+    # Loop over the segments
+    for i in range(segments):
+        # Calculate the start and end points of the segment
+        segment_start = (start_pos[0] + i * delta_x, start_pos[1] + i * delta_y)
+        segment_end = (
+            start_pos[0] + (i + 1) * delta_x,
+            start_pos[1] + (i + 1) * delta_y,
+        )
+
+        # Calculate the current alpha value based on the segment index
+        alpha = int(alpha_start + (alpha_end - alpha_start) * (i / segments))
+
+        # Draw the segment with the current alpha value
+        pygame.draw.line(
+            ray_surface,
+            (*colour, alpha),
+            segment_start,
+            segment_end,
+            5,
+        )
+
+    # Blit the surface with the fading ray onto the main screen
+    screen.blit(ray_surface, (0, 0))
 
 
 def get_wasd_move(keys):
@@ -130,13 +174,37 @@ def main():
         hit_lst = Ray.initialRayCast(player, game_map, "primitive")
         for hit in hit_lst:
 
-            draw_ray(screen, player.pos, hit.pos)
+            # draw_ray(screen, player.pos, hit.pos)
+            draw_fading_ray(
+                screen,
+                player.pos,
+                hit.pos,
+                alpha_start=hit.ray.intensity,
+                alpha_end=hit.ray.intensity / Values.DECAY_FACTOR_REFLECTION,
+                segments=50,
+            )
             curr_hit = hit
 
-            for _ in range(Values.NUM_REFLECTIONS):
-                new_ray = Ray.reflectRay(curr_hit, curr_hit.ray.intensity / 2)
+            for _ in range(Values.MAX_REFLECTIONS):
+
+                new_intensity = curr_hit.ray.intensity / Values.DECAY_FACTOR_REFLECTION
+
+                if new_intensity < 1:
+                    break
+
+                new_ray = Ray.reflectRay(curr_hit, new_intensity)
                 new_hit = new_ray.cast(game_map, "primitive")
-                draw_ray(screen, new_ray.pos, new_hit.pos, alpha=new_ray.intensity)
+
+                # draw_ray(screen, new_ray.pos, new_hit.pos, alpha=new_ray.intensity)
+
+                draw_fading_ray(
+                    screen,
+                    new_ray.pos,
+                    new_hit.pos,
+                    alpha_start=new_ray.intensity,
+                    alpha_end=new_ray.intensity / Values.DECAY_FACTOR_REFLECTION,
+                    segments=50,
+                )
 
                 curr_hit = new_hit
 
