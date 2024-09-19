@@ -35,19 +35,13 @@ def draw_player(screen, player):
     )
 
 
-def draw_ray(screen, player, hit, colour=(0, 0, 255)):
+def draw_ray(screen, start_vec, end_vec, colour=(0, 0, 255)):
 
-    pygame.draw.circle(
-        screen,
-        colour,
-        (int(hit.pos.x * Values.CELL_SIZE), int(hit.pos.y * Values.CELL_SIZE)),
-        1,
-    )
     pygame.draw.line(
         screen,
         colour,
-        (player.pos.x * Values.CELL_SIZE, player.pos.y * Values.CELL_SIZE),
-        (hit.pos.x * Values.CELL_SIZE, hit.pos.y * Values.CELL_SIZE),
+        (start_vec.x * Values.CELL_SIZE, start_vec.y * Values.CELL_SIZE),
+        (end_vec.x * Values.CELL_SIZE, end_vec.y * Values.CELL_SIZE),
         2,
     )
 
@@ -125,39 +119,11 @@ def main():
         hit_lst = Ray.initialRayCast(player, game_map, "primitive")
         for hit in hit_lst:
 
-            draw_ray(screen, player, hit)
+            draw_ray(screen, player.pos, hit.pos)
 
-            if hit.wall_orientation == "vertical":
-                print("vertical wall")
-
-                new_ray = Ray(hit.pos, Vector([hit.ray.dir.x, hit.ray.dir.y * -1]))
-
-                # new_ray.send_reflected_ray(hit)
-                new_hit = new_ray.cast(game_map, "primitive")
-
-                pygame.draw.line(
-                    screen,
-                    (0, 255, 0),
-                    (new_ray.pos.x * Values.CELL_SIZE, new_ray.pos.y * Values.CELL_SIZE),
-                    (new_hit.pos.x * Values.CELL_SIZE, new_hit.pos.y * Values.CELL_SIZE),
-                    5,
-                )
-
-            elif hit.wall_orientation == "horizontal":
-                print("horizontal wall")
-
-                new_ray = Ray(hit.pos, Vector([hit.ray.dir.x * -1, hit.ray.dir.y]))
-
-                # new_ray.send_reflected_ray(hit)
-                new_hit = new_ray.cast(game_map, "primitive")
-
-                pygame.draw.line(
-                    screen,
-                    (0, 255, 0),
-                    (new_ray.pos.x * Values.CELL_SIZE, new_ray.pos.y * Values.CELL_SIZE),
-                    (new_hit.pos.x * Values.CELL_SIZE, new_hit.pos.y * Values.CELL_SIZE),
-                    5,
-                )
+            new_ray = Ray.reflectRay(game_map, hit)
+            new_hit = new_ray.cast(game_map, "primitive")
+            draw_ray(screen, new_ray.pos, new_hit.pos, colour=(255, 0, 0))
 
 
 

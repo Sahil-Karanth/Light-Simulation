@@ -6,6 +6,6 @@ class Values:
     SCREEN_WIDTH = CELL_SIZE * 14
     SCREEN_HEIGHT = CELL_SIZE * 14
     MOVEMENT_SPEED = CELL_SIZE / 250
-    NUM_RAYS = 4
+    NUM_RAYS = 2
 
     
