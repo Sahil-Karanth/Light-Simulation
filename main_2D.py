@@ -3,10 +3,37 @@ from copy import deepcopy
 
 import numpy as np
 import pygame
+import pyautogui as pg
 
 from classes import Player, Ray, Vector
 from values import Values
 
+
+# TODO:
+# - add a specular reflection mode where the ray scatters in a random direction
+    # - and make the line drawn a jagged line
+
+# - make intensity follow the inverse square law
+
+# - make intensity drop more when it hits a wall (sudden drop)
+
+# - add a refraction mode where light refract through drawn on grid locations (but not the outer walls still reflects off these)
+    # - add a refractive index to the ray class
+    # - snells law
+
+#  - diffraction? interference? TIR?
+
+
+def make_map():
+    width = Values.SCREEN_WIDTH // Values.CELL_SIZE
+    height = Values.SCREEN_HEIGHT // Values.CELL_SIZE
+
+    with open("map.txt", "w") as file:
+        
+        file.write("2"*width + "\n")
+        for i in range(height-2):
+            file.write(f"2{'0'*(width-2)}2\n")
+        file.write("2"*width + "\n")
 
 def load_map(file):
     with open(file, "r") as file:
@@ -152,6 +179,7 @@ def draw_map(screen, game_map):
 
 def main():
 
+    make_map()
     game_map = load_map("map.txt")
 
     pygame.init()
@@ -160,6 +188,8 @@ def main():
     pygame.display.set_caption("Raycasting")
 
     player = Player([4.5, 4.5], [0, -1])
+
+    pg.alert(text='Press "WASD" to move the player\nPress "Left" and "Right" to rotate the player\nClick to add walls\nRight click to remove walls', title='Instructions', button='OK')
 
     running = True
     while running:

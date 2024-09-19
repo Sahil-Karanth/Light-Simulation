@@ -141,7 +141,7 @@ class Ray:
 
         return None  # No collision within max_dist
 
-    def cast_primitive(self, map, max_iter=1000):
+    def cast_primitive(self, map, max_iter=100000):
 
         current_pos = Vector([self.pos.x, self.pos.y])
 
