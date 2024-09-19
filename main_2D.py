@@ -27,7 +27,7 @@ def draw_grid_cell(screen, x, y):
     )
 
 
-def check_for_map_changes(game_map, mouse_pos):
+def check_for_map_changes(game_map, mouse_pos, player):
 
     loc = [
         int(mouse_pos[0] / Values.CELL_SIZE),
@@ -36,7 +36,7 @@ def check_for_map_changes(game_map, mouse_pos):
 
     if pygame.mouse.get_pressed()[0]:
 
-        if game_map[loc[1]][loc[0]] == 0:
+        if game_map[loc[1]][loc[0]] == 0 and loc != [int(player.pos.x), int(player.pos.y)]:
             game_map[loc[1]][loc[0]] = 1
 
     # if you right click on the screen, it will remove a wall
@@ -118,7 +118,6 @@ def draw_fading_ray(
     # Blit the surface with the fading ray onto the main screen
     screen.blit(ray_surface, (0, 0))
 
-
 def get_wasd_move(keys):
 
     if keys[pygame.K_w]:
@@ -149,17 +148,6 @@ def draw_map(screen, game_map):
             if cell:
                 draw_grid_cell(screen, x, y)
 
-            # else:
-            #     pygame.draw.rect(
-            #         screen,
-            #         (0, 0, 0),
-            #         (
-            #             x * Values.CELL_SIZE,
-            #             y * Values.CELL_SIZE,
-            #             Values.CELL_SIZE,
-            #             Values.CELL_SIZE,
-            #         ),
-            #     )
 
 
 def main():
@@ -185,26 +173,7 @@ def main():
 
         next_move = get_wasd_move(keys)
 
-        # if q to toggle Value.NUM_RAYS on and off
-        q_pressed = False
-        if keys[pygame.K_q]:
-
-            if q_pressed:
-                q_pressed = False
-                continue
-
-            if Values.NUM_RAYS == 0:
-                print("setting back to original value which is: ", num_rays_copy)
-                Values.NUM_RAYS = num_rays_copy
-
-            else:
-
-                num_rays_copy = deepcopy(Values.NUM_RAYS)
-                Values.NUM_RAYS = 0
-
-            q_pressed = True
-
-        check_for_map_changes(game_map, mouse_pos)
+        check_for_map_changes(game_map, mouse_pos, player)
 
         # update_player_rotation(keys, player)
         player.dir = Vector(
