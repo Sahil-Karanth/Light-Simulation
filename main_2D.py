@@ -35,15 +35,20 @@ def draw_player(screen, player):
     )
 
 
-def draw_ray(screen, start_vec, end_vec, colour=(0, 0, 255)):
+def draw_ray(screen, start_vec, end_vec, colour=(0, 0, 255), alpha=255):
 
+    ray_surface = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+    
     pygame.draw.line(
-        screen,
-        colour,
+        ray_surface,
+        (*colour, alpha),
         (start_vec.x * Values.CELL_SIZE, start_vec.y * Values.CELL_SIZE),
         (end_vec.x * Values.CELL_SIZE, end_vec.y * Values.CELL_SIZE),
-        2,
+        5,
     )
+    
+    screen.blit(ray_surface, (0, 0))
+
 
 
 def get_wasd_move(keys):
@@ -82,6 +87,7 @@ def main():
     game_map = load_map("map.txt")
 
     pygame.init()
+
     screen = pygame.display.set_mode((Values.SCREEN_WIDTH, Values.SCREEN_HEIGHT))
     pygame.display.set_caption("Raycasting")
 
@@ -100,7 +106,12 @@ def main():
 
         # update_player_rotation(keys, player)
         mouse_pos = pygame.mouse.get_pos()
-        player.dir = Vector([mouse_pos[0] - player.pos.x * Values.CELL_SIZE, mouse_pos[1] - player.pos.y * Values.CELL_SIZE]).normalise()
+        player.dir = Vector(
+            [
+                mouse_pos[0] - player.pos.x * Values.CELL_SIZE,
+                mouse_pos[1] - player.pos.y * Values.CELL_SIZE,
+            ]
+        ).normalise()
 
         simulate_next_pos = player.pos + next_move
 
@@ -120,12 +131,14 @@ def main():
         for hit in hit_lst:
 
             draw_ray(screen, player.pos, hit.pos)
+            curr_hit = hit
 
-            new_ray = Ray.reflectRay(game_map, hit)
-            new_hit = new_ray.cast(game_map, "primitive")
-            draw_ray(screen, new_ray.pos, new_hit.pos, colour=(255, 0, 0))
+            for _ in range(Values.NUM_REFLECTIONS):
+                new_ray = Ray.reflectRay(curr_hit, curr_hit.ray.intensity / 2)
+                new_hit = new_ray.cast(game_map, "primitive")
+                draw_ray(screen, new_ray.pos, new_hit.pos, alpha=new_ray.intensity)
 
-
+                curr_hit = new_hit
 
         pygame.display.flip()
         pygame.time.Clock().tick(60)

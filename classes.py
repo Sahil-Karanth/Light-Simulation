@@ -62,9 +62,10 @@ class Player:
 
 
 class Ray:
-    def __init__(self, pos, dir):
+    def __init__(self, pos, dir, intensity=255):
         self.pos = pos
         self.dir = dir.normalise()
+        self.intensity = intensity
 
     def __str__(self):
         return f"r = {self.pos.values} + t{self.dir.values}"
@@ -88,7 +89,7 @@ class Ray:
     
 
     @staticmethod
-    def reflectRay(game_map, hit):
+    def reflectRay(hit, prev_intensity):
 
         if hit.wall_orientation == "vertical":
             new_dir = Vector([hit.ray.dir.x, hit.ray.dir.y * -1])
@@ -97,7 +98,7 @@ class Ray:
         else:
             raise ValueError("Invalid wall orientation.")
 
-        new_ray = Ray(hit.pos, new_dir)
+        new_ray = Ray(hit.pos, new_dir, prev_intensity * 0.5)
 
         return new_ray
 
