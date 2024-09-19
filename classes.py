@@ -135,8 +135,19 @@ class Ray:
         while max_iter > 0:
 
             current_pos += increment_vector
+            prev_pos = current_pos - increment_vector                
 
             if map[int(current_pos.y)][int(current_pos.x)]:
+
+                # print(f"{int(current_pos.y)} {int(current_pos.x)}")
+
+                if int(current_pos.x) != int(prev_pos.x):
+                    print("intersected with a vertical wall")
+
+                elif int(current_pos.y) != int(prev_pos.y):
+                    print("intersected with a horizontal wall")
+
+
                 return current_pos
             
             max_iter -= 1

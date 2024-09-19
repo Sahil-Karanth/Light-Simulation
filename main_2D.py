@@ -127,6 +127,8 @@ def main():
                 * Values.CELL_SIZE
             )
 
+            # print(f"Hit at {hit.values} which corresponds to the cell {hit.values}")
+
         pygame.display.flip()
         pygame.time.Clock().tick(60)
 
