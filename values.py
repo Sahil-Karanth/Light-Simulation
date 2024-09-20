@@ -10,7 +10,7 @@ class Values:
         "CELL_SIZE": CELL_SIZE,
         "SCREEN_WIDTH": CELL_SIZE * 14,
         "SCREEN_HEIGHT": CELL_SIZE * 14,
-        "MOVEMENT_SPEED": CELL_SIZE / 250,
+        "MOVEMENT_SPEED": 0.8,
 
         # adjustable in settings
         "Number_Of_Rays": 5,
