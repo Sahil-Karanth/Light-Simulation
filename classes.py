@@ -1,7 +1,7 @@
 import math
 import numpy as np
 from values import Values
-
+import pyautogui as pg
 
 class Vector:
     def __init__(self, lst):
@@ -136,8 +136,14 @@ class Ray:
             max_dist -= 1
 
             # Check if we hit a wall
-            if map[int(current_pos.y)][int(current_pos.x)]:
-                return current_pos  # Return the hit position
+
+            try:
+
+                if map[int(current_pos.y)][int(current_pos.x)]:
+                    return current_pos  # Return the hit position
+
+            except IndexError:
+                pg.alert("System crashed - probably because the entered parameters are too intensive")
 
         return None  # No collision within max_dist
 
@@ -152,16 +158,22 @@ class Ray:
             current_pos += increment_vector
             prev_pos = current_pos - increment_vector
 
-            if map[int(current_pos.y)][int(current_pos.x)]:
+            try:
 
-                hit_wall_orientation = None
-                if int(current_pos.x) != int(prev_pos.x): # crossed vertical so wall is horizontal
-                    hit_wall_orientation = "horizontal"
+                if map[int(current_pos.y)][int(current_pos.x)]:
 
-                elif int(current_pos.y) != int(prev_pos.y):
-                    hit_wall_orientation = "vertical"
+                    hit_wall_orientation = None
+                    if int(current_pos.x) != int(prev_pos.x): # crossed vertical so wall is horizontal
+                        hit_wall_orientation = "horizontal"
 
-                return Hit(current_pos, self, hit_wall_orientation)
+                    elif int(current_pos.y) != int(prev_pos.y):
+                        hit_wall_orientation = "vertical"
+
+                    return Hit(current_pos, self, hit_wall_orientation)
+
+            except IndexError:
+                pg.alert("System crashed - probably because the entered parameters are too intensive")
+                exit()
 
             max_iter -= 1
 
