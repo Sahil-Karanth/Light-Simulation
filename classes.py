@@ -55,7 +55,7 @@ class Player:
     def __init__(self, pos, dir):
         self.pos = Vector(pos)
         self.dir = Vector(dir).normalise()
-        self.fov = Values.FOV
+        self.fov = Values.get_value("Field_Of_View")
 
     def move(self, dir):
         self.pos += dir
@@ -73,7 +73,7 @@ class Ray:
     @staticmethod
     def initialRayCast(player, map, cast_type):
         hit_lst = []
-        for angle in np.linspace(-player.fov / 2, player.fov / 2, Values.NUM_RAYS):
+        for angle in np.linspace(-player.fov / 2, player.fov / 2, Values.get_value("Number_Of_Rays")):
             ray = Ray(player.pos, player.dir.rotate(angle))
 
             if cast_type == "primitive":
@@ -87,10 +87,7 @@ class Ray:
                 hit_lst.append(hit)
         return hit_lst
     
-
-    @staticmethod
-    def reflectRay(hit, new_intensity):
-
+    def __specularReflectRay(hit, new_intensity):
         if hit.wall_orientation == "vertical":
             new_dir = Vector([hit.ray.dir.x, hit.ray.dir.y * -1])
         elif hit.wall_orientation == "horizontal":
@@ -101,6 +98,35 @@ class Ray:
         new_ray = Ray(hit.pos, new_dir, new_intensity)
 
         return new_ray
+
+    def __diffuseReflectRay(hit, new_intensity):
+        
+        if hit.wall_orientation == "vertical":
+            max_angle = math.pi / 2
+            min_angle = 0
+
+        elif hit.wall_orientation == "horizontal":
+            max_angle = math.pi
+            min_angle = math.pi / 2
+
+        else:
+            raise ValueError("Invalid wall orientation.")
+        
+        angle = np.random.uniform(min_angle, max_angle)
+
+        new_dir = hit.ray.dir.rotate(angle)
+
+
+        new_ray = Ray(hit.pos, new_dir, new_intensity)
+        return new_ray
+
+    @staticmethod
+    def reflectRay(hit, new_intensity):
+
+        if Values.get_value("Reflection_Type") == "specular":
+            return Ray.__specularReflectRay(hit, new_intensity)
+        elif Values.get_value("Reflection_Type") == "diffuse":
+            return Ray.__diffuseReflectRay(hit, new_intensity)
 
 
     def cast_dda(self, map, max_dist=20):

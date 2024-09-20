@@ -21,14 +21,14 @@ class SettingsWindow:
 
     def __create_slider(self, min_value, max_value, step, label):
 
-        key = label.lower().replace(" ", "_")
+        key = label.replace(" ", "_")
 
         slider = sg.Slider(
             key=key,
             range=(min_value, max_value),
             orientation="h",
             size=(15, 15),
-            default_value=(min_value + max_value) // 2,
+            default_value=Values.get_value(key),
             resolution=step,
         )
 
@@ -59,10 +59,10 @@ class SettingsWindow:
         apply_button = sg.Column([[sg.Button("Apply", button_color=("white", "black"))]], justification="center", pad=(0, 20))
 
         layout = [
-            [self.__create_slider(1, 100, 1, "Number of Rays")],
+            [self.__create_slider(1, 100, 1, "Number Of Rays")],
             [self.__create_slider(1, 20, 1, "Max Reflections")],
             [self.__create_slider(1, 5, 0.2, "Decay Factor")],
-            [self.__create_slider(10, 360, 1, "Field of View")],
+            [self.__create_slider(10, 360, 1, "Field Of View")],
             [self.__create_toggle_button("Reflection Mode", "Refraction Mode")],
             [self.__create_toggle_button("Specular Reflection", "Diffuse Reflection")],
             [self.__create_toggle_button("Primitive Cast", "DDA Cast")],
@@ -73,26 +73,15 @@ class SettingsWindow:
     
     def __apply_settings(self, values):
 
-        # update Values class with new settings
-        Values.NUM_RAYS = int(values["number_of_rays"])
-        Values.MAX_REFLECTIONS = int(values["max_reflections"])
-        Values.DECAY_FACTOR_REFLECTION = float(values["decay_factor"])
-        Values.FOV = float(values["field_of_view"]) * np.pi / 180
+        # update from sliders
+        Values.set_value("Number_Of_Rays", int(values["Number_Of_Rays"]))
+        Values.set_value("Max_Reflections", int(values["Max_Reflections"]))
+        Values.set_value("Decay_Factor", float(values["Decay_Factor"]))
+        Values.set_value("Field_Of_View", float(values["Field_Of_View"]) * np.pi / 180)
 
         # update from toggle states
         for button in self.selected_buttons:
-            if button == "Reflection_Mode":
-                Values.REFLECTION_MODE = "reflection"
-            elif button == "Refraction_Mode":
-                Values.REFLECTION_MODE = "refraction"
-            elif button == "Specular_Reflection":
-                Values.REFLECTION_TYPE = "specular"
-            elif button == "Diffuse_Reflection":
-                Values.REFLECTION_TYPE = "diffuse"
-            elif button == "Primitive_Cast":
-                Values.CAST_TYPE = "primitive"
-            elif button == "DDA_Cast":
-                Values.CAST_TYPE = "dda"
+            Values.set_value(button, True)
 
 
 
