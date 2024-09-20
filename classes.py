@@ -1,7 +1,10 @@
 import math
+
 import numpy as np
-from values import Values
 import pyautogui as pg
+
+from values import Values
+
 
 class Vector:
     def __init__(self, lst):
@@ -73,7 +76,9 @@ class Ray:
     @staticmethod
     def initialRayCast(player, map, cast_type):
         hit_lst = []
-        for angle in np.linspace(-player.fov / 2, player.fov / 2, Values.get_value("Number_Of_Rays")):
+        for angle in np.linspace(
+            -player.fov / 2, player.fov / 2, Values.get_value("Number_Of_Rays")
+        ):
             ray = Ray(player.pos, player.dir.rotate(angle))
 
             if cast_type == "primitive":
@@ -86,7 +91,7 @@ class Ray:
             if hit:
                 hit_lst.append(hit)
         return hit_lst
-    
+
     def __specularReflectRay(hit, new_intensity):
         if hit.wall_orientation == "vertical":
             new_dir = Vector([hit.ray.dir.x, hit.ray.dir.y * -1])
@@ -100,7 +105,7 @@ class Ray:
         return new_ray
 
     def __diffuseReflectRay(hit, new_intensity):
-        
+
         if hit.wall_orientation == "vertical":
             max_angle = math.pi / 2
             min_angle = 0
@@ -111,13 +116,13 @@ class Ray:
 
         else:
             raise ValueError("Invalid wall orientation.")
-        
+
         angle = np.random.uniform(min_angle, max_angle)
 
         new_dir = hit.ray.dir.rotate(angle)
 
-
         new_ray = Ray(hit.pos, new_dir, new_intensity)
+
         return new_ray
 
     @staticmethod
@@ -127,7 +132,6 @@ class Ray:
             return Ray.__specularReflectRay(hit, new_intensity)
         elif Values.get_value("Reflection_Type") == "Diffuse":
             return Ray.__diffuseReflectRay(hit, new_intensity)
-
 
     def cast_dda(self, map, max_dist=20):
         current_pos = Vector([self.pos.x, self.pos.y])
@@ -169,7 +173,9 @@ class Ray:
                     return current_pos  # Return the hit position
 
             except IndexError:
-                pg.alert("System crashed - probably because the entered parameters are too intensive")
+                pg.alert(
+                    "System crashed - probably because the entered parameters are too intensive"
+                )
 
         return None  # No collision within max_dist
 
@@ -189,7 +195,9 @@ class Ray:
                 if map[int(current_pos.y)][int(current_pos.x)]:
 
                     hit_wall_orientation = None
-                    if int(current_pos.x) != int(prev_pos.x): # crossed vertical so wall is horizontal
+                    if int(current_pos.x) != int(
+                        prev_pos.x
+                    ):  # crossed vertical so wall is horizontal
                         hit_wall_orientation = "horizontal"
 
                     elif int(current_pos.y) != int(prev_pos.y):
@@ -198,7 +206,9 @@ class Ray:
                     return Hit(current_pos, self, hit_wall_orientation)
 
             except IndexError:
-                pg.alert("System crashed - probably because the entered parameters are too intensive")
+                pg.alert(
+                    "System crashed - probably because the entered parameters are too intensive"
+                )
                 exit()
 
             max_iter -= 1
@@ -214,7 +224,6 @@ class Ray:
 
     #     return reflected_ray
 
-
     def cast(self, game_map, cast_type):
         if cast_type == "Primitive":
             return self.cast_primitive(game_map)
@@ -222,6 +231,7 @@ class Ray:
             return self.cast_dda(game_map)
         else:
             raise ValueError("Invalid cast type.")
+
 
 class Hit:
     def __init__(self, pos, ray, hit_wall_orientation):

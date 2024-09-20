@@ -220,92 +220,91 @@ def main():
     screen = pygame.display.set_mode(
         (Values.get_value("SCREEN_WIDTH"), Values.get_value("SCREEN_WIDTH"))
     )
-    pygame.display.set_caption("Raycasting")
+    pygame.display.set_caption("Raycasting | press 'p' to open settings | press 'f' to freeze (good for diffuse)")
 
     player = Player([4.5, 4.5], [0, -1])
 
     settings_window = SettingsWindow()
     settings_window.run()
 
+    frozen = False
+
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_f:
+                    frozen = not frozen
 
         check_for_settings_open()
 
-        # Handle player movement
-        keys = pygame.key.get_pressed()
-        mouse_pos = pygame.mouse.get_pos()
+        if not frozen:  # Only update if not frozen
+            # Handle player movement
+            keys = pygame.key.get_pressed()
+            mouse_pos = pygame.mouse.get_pos()
 
-        next_move = get_wasd_move(keys)
+            next_move = get_wasd_move(keys)
 
-        check_for_map_changes(game_map, mouse_pos, player)
+            check_for_map_changes(game_map, mouse_pos, player)
 
-        # update_player_rotation(keys, player)
-        player.dir = Vector(
-            [
-                mouse_pos[0] - player.pos.x * Values.get_value("CELL_SIZE"),
-                mouse_pos[1] - player.pos.y * Values.get_value("CELL_SIZE"),
-            ]
-        ).normalise()
+            # Update player direction
+            player.dir = Vector(
+                [
+                    mouse_pos[0] - player.pos.x * Values.get_value("CELL_SIZE"),
+                    mouse_pos[1] - player.pos.y * Values.get_value("CELL_SIZE"),
+                ]
+            ).normalise()
 
-        simulate_next_pos = player.pos + next_move
+            simulate_next_pos = player.pos + next_move
 
-        # Check if the next position is a wall
-        if game_map[int(simulate_next_pos.y)][int(simulate_next_pos.x)]:
-            continue
+            # Check if the next position is a wall
+            if not game_map[int(simulate_next_pos.y)][int(simulate_next_pos.x)]:
+                player.pos += next_move
 
-        player.pos += next_move
+            screen.fill((0, 0, 0))
 
-        screen.fill((0, 0, 0))
+            draw_map(screen, game_map)
+            draw_player(screen, player)
 
-        draw_map(screen, game_map)
-
-        draw_player(screen, player)
-
-        hit_lst = Ray.initialRayCast(player, game_map, "primitive")
-        for hit in hit_lst:
-
-            draw_fading_ray(
-                screen,
-                player.pos,
-                hit.pos,
-                alpha_start=hit.ray.intensity,
-                alpha_end=hit.ray.intensity / Values.get_value("Decay_Factor"),
-                segments=50,
-            )
-            curr_hit = hit
-
-            for _ in range(Values.get_value("Max_Reflections")):
-
-                new_intensity = curr_hit.ray.intensity / Values.get_value(
-                    "Decay_Factor"
-                )
-
-                if new_intensity < 1:
-                    break
-
-                new_ray = Ray.reflectRay(curr_hit, new_intensity)
-                new_hit = new_ray.cast(game_map, "Primitive")
-
+            # Raycasting and drawing logic
+            hit_lst = Ray.initialRayCast(player, game_map, "primitive")
+            for hit in hit_lst:
                 draw_fading_ray(
                     screen,
-                    new_ray.pos,
-                    new_hit.pos,
-                    alpha_start=new_ray.intensity,
-                    alpha_end=new_ray.intensity / Values.get_value("Decay_Factor"),
+                    player.pos,
+                    hit.pos,
+                    alpha_start=hit.ray.intensity,
+                    alpha_end=hit.ray.intensity / Values.get_value("Decay_Factor"),
                     segments=50,
                 )
+                curr_hit = hit
 
-                curr_hit = new_hit
+                for _ in range(Values.get_value("Max_Reflections")):
+                    new_intensity = curr_hit.ray.intensity / Values.get_value("Decay_Factor")
+
+                    if new_intensity < 1:
+                        break
+
+                    new_ray = Ray.reflectRay(curr_hit, new_intensity)
+                    new_hit = new_ray.cast(game_map, "Primitive")
+
+                    draw_fading_ray(
+                        screen,
+                        new_ray.pos,
+                        new_hit.pos,
+                        alpha_start=new_ray.intensity,
+                        alpha_end=new_ray.intensity / Values.get_value("Decay_Factor"),
+                        segments=50,
+                    )
+
+                    curr_hit = new_hit
 
         pygame.display.flip()
         pygame.time.Clock().tick(60)
 
     pygame.quit()
-
 
 if __name__ == "__main__":
     main()
