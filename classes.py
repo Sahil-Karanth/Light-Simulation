@@ -53,6 +53,9 @@ class Vector:
             ]
         )
 
+    def get_angle(self):
+        return math.atan2(self.y, self.x)
+
 
 class Player:
     def __init__(self, pos, dir):
@@ -133,6 +136,35 @@ class Ray:
         elif Values.get_value("Reflection_Type") == "Diffuse":
             return Ray.__diffuseReflectRay(hit, new_intensity)
 
+    @staticmethod
+    def refractRay(hit, new_intensity):
+
+        if hit.wall_orientation == "vertical":
+            
+            normal = Vector([0, 1])
+            incidence_angle = hit.ray.dir.get_angle()
+            refractive_index = Values.get_value("REFRACTIVE_INDEX")
+            refraction_angle = math.asin(math.sin(incidence_angle) / refractive_index)
+
+            new_dir = hit.ray.dir.rotate(refraction_angle)
+
+        elif hit.wall_orientation == "horizontal":
+                
+                normal = Vector([1, 0])
+                incidence_angle = hit.ray.dir.get_angle()
+                refractive_index = Values.get_value("REFRACTIVE_INDEX")
+                refraction_angle = math.asin(math.sin(incidence_angle) / refractive_index)
+    
+                new_dir = hit.ray.dir.rotate(refraction_angle)
+
+        else:
+            raise ValueError("Invalid wall orientation.")
+        
+        new_ray = Ray(hit.pos, new_dir, new_intensity)
+
+        return new_ray
+
+
     def cast_dda(self, map, max_dist=20):
         current_pos = Vector([self.pos.x, self.pos.y])
 
@@ -212,17 +244,6 @@ class Ray:
                 exit()
 
             max_iter -= 1
-
-    # def send_reflected_ray(self, hit):
-
-    #     if hit.wall_orientation == "vertical":
-    #         reflected_ray_dir = Vector([self.dir.x, self.dir.y * -1])
-    #     else:
-    #         reflected_ray_dir = Vector([self.dir.x, self.dir.y * -1])
-
-    #     reflected_ray = Ray(hit.pos, reflected_ray_dir)
-
-    #     return reflected_ray
 
     def cast(self, game_map, cast_type):
         if cast_type == "Primitive":

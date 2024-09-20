@@ -11,9 +11,10 @@ class Values:
         "SCREEN_WIDTH": CELL_SIZE * 14,
         "SCREEN_HEIGHT": CELL_SIZE * 14,
         "MOVEMENT_SPEED": 0.8,
+        "REFRACTIVE_INDEX": 1.5,
 
         # adjustable in settings
-        "Number_Of_Rays": 5,
+        "Number_Of_Rays": 1,
         "Max_Reflections": 2,
         "Decay_Factor": 1.5,
         "Field_Of_View": np.pi / 6,

@@ -220,7 +220,9 @@ def main():
     screen = pygame.display.set_mode(
         (Values.get_value("SCREEN_WIDTH"), Values.get_value("SCREEN_WIDTH"))
     )
-    pygame.display.set_caption("Raycasting | press 'p' to open settings | press 'f' to freeze (good for diffuse)")
+    pygame.display.set_caption(
+        "Raycasting | press 'p' to open settings | press 'f' to freeze (good for diffuse)"
+    )
 
     player = Player([4.5, 4.5], [0, -1])
 
@@ -268,7 +270,6 @@ def main():
             draw_map(screen, game_map)
             draw_player(screen, player)
 
-            # Raycasting and drawing logic
             hit_lst = Ray.initialRayCast(player, game_map, "primitive")
             for hit in hit_lst:
                 draw_fading_ray(
@@ -281,30 +282,50 @@ def main():
                 )
                 curr_hit = hit
 
-                for _ in range(Values.get_value("Max_Reflections")):
-                    new_intensity = curr_hit.ray.intensity / Values.get_value("Decay_Factor")
+                if Values.get_value("Reflection_Mode") == "Reflection":
 
-                    if new_intensity < 1:
-                        break
+                    for _ in range(Values.get_value("Max_Reflections")):
+                        new_intensity = curr_hit.ray.intensity / Values.get_value(
+                            "Decay_Factor"
+                        )
 
-                    new_ray = Ray.reflectRay(curr_hit, new_intensity)
-                    new_hit = new_ray.cast(game_map, "Primitive")
+                        if new_intensity < 1:
+                            break
+
+                        new_ray = Ray.reflectRay(curr_hit, new_intensity)
+                        new_hit = new_ray.cast(game_map, "Primitive")
+
+                        draw_fading_ray(
+                            screen,
+                            new_ray.pos,
+                            new_hit.pos,
+                            alpha_start=new_ray.intensity,
+                            alpha_end=new_ray.intensity / Values.get_value("Decay_Factor"),
+                            segments=50,
+                        )
+
+                        curr_hit = new_hit
+
+                elif Values.get_value("Reflection_Mode") == "Refraction":
+                    
+                    new_ray = Ray.refractRay(curr_hit, 255)
 
                     draw_fading_ray(
                         screen,
+                        curr_hit.pos,
                         new_ray.pos,
-                        new_hit.pos,
-                        alpha_start=new_ray.intensity,
-                        alpha_end=new_ray.intensity / Values.get_value("Decay_Factor"),
+                        alpha_start=curr_hit.ray.intensity,
+                        alpha_end=curr_hit.ray.intensity / Values.get_value("Decay_Factor"),
                         segments=50,
                     )
 
-                    curr_hit = new_hit
+
 
         pygame.display.flip()
         pygame.time.Clock().tick(60)
 
     pygame.quit()
+
 
 if __name__ == "__main__":
     main()
