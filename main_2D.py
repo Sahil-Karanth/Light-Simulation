@@ -288,7 +288,7 @@ def main():
                     break
 
                 new_ray = Ray.reflectRay(curr_hit, new_intensity)
-                new_hit = new_ray.cast(game_map, "primitive")
+                new_hit = new_ray.cast(game_map, "Primitive")
 
                 draw_fading_ray(
                     screen,

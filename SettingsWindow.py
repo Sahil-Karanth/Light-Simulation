@@ -81,8 +81,7 @@ class SettingsWindow:
 
         # update from toggle states
         for button in self.selected_buttons:
-            Values.set_value(button, True)
-
+            Values.set_toggle_value(button)
 
 
     def __handle_toggle_change(self, event):

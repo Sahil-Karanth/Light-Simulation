@@ -28,4 +28,23 @@ class Values:
     
     def set_value(key, value):
         Values.values[key] = value
+
+    def set_toggle_value(value):
+        if value == "Reflection_Mode":
+            print("setting to reflection")
+            Values.set_value("Reflection_Mode", "Reflection")
+        elif value == "Refraction_Mode":
+            print("setting to refraction")
+            Values.set_value("Reflection_Mode", "Refraction")
+        elif value == "Specular_Reflection":
+            Values.set_value("Reflection_Type", "Specular")
+        elif value == "Diffuse_Reflection":
+            Values.set_value("Reflection_Type", "Diffuse")
+        elif value == "Primitive_Cast":
+            Values.set_value("Cast_Type", "Primitive")
+        elif value == "DDA_Cast":
+            Values.set_value("Cast_Type", "DDA")
+        else:
+            print(value)
+            raise ValueError("Invalid toggle value.")
     

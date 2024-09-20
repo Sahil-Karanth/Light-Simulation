@@ -123,9 +123,9 @@ class Ray:
     @staticmethod
     def reflectRay(hit, new_intensity):
 
-        if Values.get_value("Reflection_Type") == "specular":
+        if Values.get_value("Reflection_Type") == "Specular":
             return Ray.__specularReflectRay(hit, new_intensity)
-        elif Values.get_value("Reflection_Type") == "diffuse":
+        elif Values.get_value("Reflection_Type") == "Diffuse":
             return Ray.__diffuseReflectRay(hit, new_intensity)
 
 
@@ -216,9 +216,9 @@ class Ray:
 
 
     def cast(self, game_map, cast_type):
-        if cast_type == "primitive":
+        if cast_type == "Primitive":
             return self.cast_primitive(game_map)
-        elif cast_type == "dda":
+        elif cast_type == "DDA":
             return self.cast_dda(game_map)
         else:
             raise ValueError("Invalid cast type.")
