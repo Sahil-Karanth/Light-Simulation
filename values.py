@@ -11,3 +11,7 @@ class Values:
     MAX_REFLECTIONS = 2
     DECAY_FACTOR_REFLECTION = 2
     FOV = np.pi / 6
+    REFLECTION_MODE = "reflection"
+    REFLECTION_TYPE = "specular"
+    CAST_TYPE = "primitive"
+    

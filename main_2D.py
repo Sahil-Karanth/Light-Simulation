@@ -4,6 +4,7 @@ from copy import deepcopy
 import numpy as np
 import pygame
 import pyautogui as pg
+from SettingsWindow import SettingsWindow
 
 from classes import Player, Ray, Vector
 from values import Values
@@ -194,14 +195,23 @@ def main():
 
     player = Player([4.5, 4.5], [0, -1])
 
-    # pg dropdown menu
-    
+    settings_window = SettingsWindow()
+    settings_window.run()
+
+    # test print all settings
 
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+        # bring up the settings window
+        if pygame.key.get_pressed()[pygame.K_p]:
+            print("Opening settings window")
+            settings_window = SettingsWindow()
+            settings_window.run()
+
 
         # Handle player movement
         keys = pygame.key.get_pressed()

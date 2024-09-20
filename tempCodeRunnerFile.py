@@ -1,1 +1,0 @@
-sg.Column([[label_text, slider]], element_justification="center")
