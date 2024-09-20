@@ -22,7 +22,7 @@ class SettingsWindow:
     def __create_slider(self, min_value, max_value, step, label):
 
         key = label.lower().replace(" ", "_")
-        print(key)
+
         slider = sg.Slider(
             key=key,
             range=(min_value, max_value),
@@ -32,14 +32,14 @@ class SettingsWindow:
             resolution=step,
         )
 
-        label_text = sg.Text(label)
+        label_text = sg.Text(label, justification="center")
 
         layout = [
             [label_text],
             [slider],
         ]
 
-        return sg.Column(layout, element_justification="center")
+        return sg.Column(layout, justification="center")
     
 
     def __create_toggle_button(self, label1, label2):
@@ -60,9 +60,9 @@ class SettingsWindow:
 
         layout = [
             [self.__create_slider(1, 100, 1, "Number of Rays")],
-            [self.__create_slider(1, 100, 1, "Max Reflections")],
-            [self.__create_slider(1, 100, 1, "Decay Factor")],
-            [self.__create_slider(1, 100, 1, "Field of View")],
+            [self.__create_slider(1, 20, 1, "Max Reflections")],
+            [self.__create_slider(1, 5, 0.2, "Decay Factor")],
+            [self.__create_slider(10, 360, 1, "Field of View")],
             [self.__create_toggle_button("Reflection Mode", "Refraction Mode")],
             [self.__create_toggle_button("Specular Reflection", "Diffuse Reflection")],
             [self.__create_toggle_button("Primitive Cast", "DDA Cast")],

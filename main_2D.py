@@ -181,6 +181,11 @@ def draw_map(screen, game_map):
             if cell:
                 draw_grid_cell(screen, x, y)
 
+def check_for_settings_open():
+    if pygame.key.get_pressed()[pygame.K_p]:
+        print("Opening settings window")
+        settings_window = SettingsWindow()
+        settings_window.run()
 
 
 def main():
@@ -198,20 +203,13 @@ def main():
     settings_window = SettingsWindow()
     settings_window.run()
 
-    # test print all settings
-
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-        # bring up the settings window
-        if pygame.key.get_pressed()[pygame.K_p]:
-            print("Opening settings window")
-            settings_window = SettingsWindow()
-            settings_window.run()
-
+        check_for_settings_open()
 
         # Handle player movement
         keys = pygame.key.get_pressed()
