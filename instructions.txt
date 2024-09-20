@@ -1,0 +1,6 @@
+Use "WASD" to move the light source
+Use the mouse to rotate the light source
+Drag left click to draw on walls
+Drag right click to remove walls
+Press 'M' to switch between reflection and refraction mode
+Press 'S' 

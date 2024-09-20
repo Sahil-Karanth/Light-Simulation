@@ -160,6 +160,11 @@ def get_wasd_move(keys):
 
     return next_move
 
+def get_instruction_text():
+
+    with open("instructions.txt", "r") as file:
+        return file.read()
+
 
 def update_player_rotation(keys, player):
 
@@ -189,7 +194,8 @@ def main():
 
     player = Player([4.5, 4.5], [0, -1])
 
-    pg.alert(text='Press "WASD" to move the player\nPress "Left" and "Right" to rotate the player\nClick to add walls\nRight click to remove walls', title='Instructions', button='OK')
+    # pg dropdown menu
+    
 
     running = True
     while running:

@@ -1,3 +1,1 @@
-
-
-            if Values.NUM_RAYS == 0:
+sg.Column([[label_text, slider]], element_justification="center")
