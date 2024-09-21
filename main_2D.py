@@ -242,6 +242,8 @@ def perform_trace(player, game_map, screen, hit_lst):
             
             new_ray = Ray.refractRay(curr_hit, 255)
 
+            print(new_ray)
+
             new_hit = new_ray.cast(game_map, "Primitive", refracting=True)
             
             draw_fading_ray(

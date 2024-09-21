@@ -158,38 +158,28 @@ class Ray:
     @staticmethod
     def refractRay(hit, new_intensity):
 
-        if hit.wall_orientation == "vertical":
+        ray_angle = hit.ray.dir.get_angle()
+        # print(f"Ray angle: {ray_angle}")
+        incident_angle = Ray.__get_incidence_angle(ray_angle)
+        # print(f"Incident angle: {incident_angle}")
+        refracted_angle = np.arcsin(
+            np.sin(incident_angle) / Values.get_value("Refractive_Index")
+        )
 
-            ray_angle = hit.ray.dir.get_angle()
-            print(f"Ray angle: {ray_angle}")
-            incident_angle = Ray.__get_incidence_angle(ray_angle)
-            print(f"Incident angle: {incident_angle}")
-            refracted_angle = np.arcsin(
-                np.sin(incident_angle) / Values.get_value("Refractive_Index")
-            )
+        if ray_angle < 0 and ray_angle >= -math.pi / 2:
+            refracted_angle *= -1
+        
+        elif ray_angle < -math.pi / 2 and ray_angle >= -math.pi:
+            refracted_angle = math.pi - refracted_angle
+            refracted_angle *= -1
 
-            print(f"Refracted angle: {refracted_angle}")
+        elif ray_angle > 0 and ray_angle <= math.pi / 2:
+            pass
 
-            if ray_angle < 0:
-                refracted_angle *= -1
+        elif ray_angle > math.pi / 2 and ray_angle <= math.pi:
+            refracted_angle = math.pi - refracted_angle
 
-            new_dir = Vector([math.cos(refracted_angle), math.sin(refracted_angle)])
-
-        elif hit.wall_orientation == "horizontal":
-
-            ray_angle = hit.ray.dir.get_angle()
-            incident_angle = Ray.__get_incidence_angle(ray_angle)
-            refracted_angle = np.arcsin(
-                np.sin(incident_angle) / Values.get_value("Refractive_Index")
-            )
-
-            if ray_angle < 0:
-                refracted_angle *= -1
-
-            new_dir = Vector([math.sin(refracted_angle), math.cos(refracted_angle)])
-
-        else:
-            raise ValueError("Invalid wall orientation.")
+        new_dir = Vector([math.cos(refracted_angle), math.sin(refracted_angle)])
 
         new_ray = Ray(hit.pos, new_dir, new_intensity)
 
