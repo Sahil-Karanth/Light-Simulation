@@ -85,7 +85,7 @@ class Ray:
             ray = Ray(player.pos, player.dir.rotate(angle))
 
             if cast_type == "primitive":
-                hit = ray.cast_primitive(map)
+                hit = ray.cast_primitive(map, refracting=False)
             elif cast_type == "dda":
                 hit = ray.cast_dda(map)
             else:
@@ -160,6 +160,7 @@ class Ray:
         if hit.wall_orientation == "vertical":
 
             ray_angle = hit.ray.dir.get_angle()
+            print(ray_angle)
             incident_angle = Ray.__get_incidence_angle(ray_angle)
             refracted_angle = np.arcsin(
                 np.sin(incident_angle) / Values.get_value("Refractive_Index")
@@ -236,11 +237,13 @@ class Ray:
 
         return None  # No collision within max_dist
 
-    def cast_primitive(self, map, max_iter=100000, casting_inside_block=False):
+    def cast_primitive(self, map, refracting, max_iter=100000,):
 
         current_pos = Vector([self.pos.x, self.pos.y])
 
         increment_vector = self.dir * 0.1
+
+        stop_condition = 0 if refracting else 1
 
         while max_iter > 0:
 
@@ -248,8 +251,7 @@ class Ray:
             prev_pos = current_pos - increment_vector
 
             try:
-
-                if map[int(current_pos.y)][int(current_pos.x)]:
+                if map[int(current_pos.y)][int(current_pos.x)] == stop_condition or map[int(current_pos.y)][int(current_pos.x)] == 2:  # gone from inside block to outside
 
                     hit_wall_orientation = None
                     if int(current_pos.x) != int(
@@ -270,49 +272,14 @@ class Ray:
 
             max_iter -= 1
 
-    def cast(self, game_map, cast_type):
+    def cast(self, game_map, cast_type, refracting):
         if cast_type == "Primitive":
-            return self.cast_primitive(game_map)
+            return self.cast_primitive(game_map, refracting)
         elif cast_type == "DDA":
             return self.cast_dda(game_map)
         else:
             raise ValueError("Invalid cast type.")
 
-
-    def cast_refraction(self, map, max_iter=100000):
-
-        current_pos = Vector([self.pos.x, self.pos.y])
-
-        increment_vector = self.dir * 0.1
-
-        while max_iter > 0:
-
-            current_pos += increment_vector
-            prev_pos = current_pos - increment_vector
-
-            try:
-
-                if map[int(current_pos.y)][int(current_pos.x)] == 0: # gone from inside block to outside
-
-                    hit_wall_orientation = None
-                    if int(current_pos.x) != int(
-                        prev_pos.x
-                    ):  # crossed vertical so wall is horizontal
-                        hit_wall_orientation = "horizontal"
-
-                    elif int(current_pos.y) != int(prev_pos.y):
-                        hit_wall_orientation = "vertical"
-
-                    return Hit(current_pos, self, hit_wall_orientation)
-                
-
-            except IndexError:
-                pg.alert(
-                    "System crashed - probably because the entered parameters are too intensive"
-                )
-                exit()
-
-            max_iter -= 1
 
 class Hit:
     def __init__(self, pos, ray, hit_wall_orientation):

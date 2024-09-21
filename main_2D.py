@@ -223,7 +223,7 @@ def perform_trace(player, game_map, screen, hit_lst):
                     break
 
                 new_ray = Ray.reflectRay(curr_hit, new_intensity)
-                new_hit = new_ray.cast(game_map, "Primitive")
+                new_hit = new_ray.cast(game_map, "Primitive", refracting=False)
 
                 draw_fading_ray(
                     screen,
@@ -240,7 +240,7 @@ def perform_trace(player, game_map, screen, hit_lst):
             
             new_ray = Ray.refractRay(curr_hit, 255)
 
-            new_hit = new_ray.cast_refraction(game_map)
+            new_hit = new_ray.cast(game_map, "Primitive", refracting=True)
             
             draw_fading_ray(
                 screen,
@@ -251,7 +251,6 @@ def perform_trace(player, game_map, screen, hit_lst):
                 segments=50,
             )
 
-            curr_hit = new_hit
 
 def main():
 
