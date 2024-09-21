@@ -96,9 +96,9 @@ class Ray:
         return hit_lst
 
     def __specularReflectRay(hit, new_intensity):
-        if hit.wall_orientation == "vertical":
+        if hit.wall_orientation == "horizontal":
             new_dir = Vector([hit.ray.dir.x, hit.ray.dir.y * -1])
-        elif hit.wall_orientation == "horizontal":
+        elif hit.wall_orientation == "vertical":
             new_dir = Vector([hit.ray.dir.x * -1, hit.ray.dir.y])
         else:
             raise ValueError("Invalid wall orientation.")
@@ -109,6 +109,7 @@ class Ray:
 
     def __diffuseReflectRay(hit, new_intensity):
 
+        # CHECK IF I ACC NEED TO SWITHC HORIZONTAL AND VERITCAL
         if hit.wall_orientation == "vertical":
             max_angle = math.pi / 2
             min_angle = 0
@@ -160,11 +161,14 @@ class Ray:
         if hit.wall_orientation == "vertical":
 
             ray_angle = hit.ray.dir.get_angle()
-            print(ray_angle)
+            print(f"Ray angle: {ray_angle}")
             incident_angle = Ray.__get_incidence_angle(ray_angle)
+            print(f"Incident angle: {incident_angle}")
             refracted_angle = np.arcsin(
                 np.sin(incident_angle) / Values.get_value("Refractive_Index")
             )
+
+            print(f"Refracted angle: {refracted_angle}")
 
             if ray_angle < 0:
                 refracted_angle *= -1
@@ -257,10 +261,10 @@ class Ray:
                     if int(current_pos.x) != int(
                         prev_pos.x
                     ):  # crossed vertical so wall is horizontal
-                        hit_wall_orientation = "horizontal"
+                        hit_wall_orientation = "vertical"
 
                     elif int(current_pos.y) != int(prev_pos.y):
-                        hit_wall_orientation = "vertical"
+                        hit_wall_orientation = "horizontal"
 
                     return Hit(current_pos, self, hit_wall_orientation)
 

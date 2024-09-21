@@ -222,6 +222,8 @@ def perform_trace(player, game_map, screen, hit_lst):
                 if new_intensity < 1:
                     break
 
+                print(curr_hit.wall_orientation)
+
                 new_ray = Ray.reflectRay(curr_hit, new_intensity)
                 new_hit = new_ray.cast(game_map, "Primitive", refracting=False)
 
