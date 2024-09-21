@@ -137,33 +137,58 @@ class Ray:
             return Ray.__diffuseReflectRay(hit, new_intensity)
 
     @staticmethod
+    def __get_incidence_angle(angle):
+        # angle ranges from -pi to pi
+        if angle < 0 and angle >= -math.pi / 2:
+            return -angle
+
+        elif angle < -math.pi / 2 and angle >= -math.pi:
+            return angle + math.pi
+
+        elif angle > 0 and angle <= math.pi / 2:
+            return angle
+
+        elif angle > math.pi / 2 and angle <= math.pi:
+            return math.pi - angle
+
+        else:
+            raise ValueError("Invalid angle value.")
+
+    @staticmethod
     def refractRay(hit, new_intensity):
 
         if hit.wall_orientation == "vertical":
-            
-            normal = Vector([0, 1])
-            incidence_angle = hit.ray.dir.get_angle()
-            refractive_index = Values.get_value("REFRACTIVE_INDEX")
-            refraction_angle = math.asin(math.sin(incidence_angle) / refractive_index)
 
-            new_dir = hit.ray.dir.rotate(refraction_angle)
+            ray_angle = hit.ray.dir.get_angle()
+            incident_angle = Ray.__get_incidence_angle(ray_angle)
+            refracted_angle = np.arcsin(
+                np.sin(incident_angle) / Values.get_value("Refractive_Index")
+            )
+
+            if ray_angle < 0:
+                refracted_angle *= -1
+
+            new_dir = Vector([math.cos(refracted_angle), math.sin(refracted_angle)])
 
         elif hit.wall_orientation == "horizontal":
-                
-                normal = Vector([1, 0])
-                incidence_angle = hit.ray.dir.get_angle()
-                refractive_index = Values.get_value("REFRACTIVE_INDEX")
-                refraction_angle = math.asin(math.sin(incidence_angle) / refractive_index)
-    
-                new_dir = hit.ray.dir.rotate(refraction_angle)
+
+            ray_angle = hit.ray.dir.get_angle()
+            incident_angle = Ray.__get_incidence_angle(ray_angle)
+            refracted_angle = np.arcsin(
+                np.sin(incident_angle) / Values.get_value("Refractive_Index")
+            )
+
+            if ray_angle < 0:
+                refracted_angle *= -1
+
+            new_dir = Vector([math.sin(refracted_angle), math.cos(refracted_angle)])
 
         else:
             raise ValueError("Invalid wall orientation.")
-        
+
         new_ray = Ray(hit.pos, new_dir, new_intensity)
 
         return new_ray
-
 
     def cast_dda(self, map, max_dist=20):
         current_pos = Vector([self.pos.x, self.pos.y])
@@ -211,7 +236,7 @@ class Ray:
 
         return None  # No collision within max_dist
 
-    def cast_primitive(self, map, max_iter=100000):
+    def cast_primitive(self, map, max_iter=100000, casting_inside_block=False):
 
         current_pos = Vector([self.pos.x, self.pos.y])
 
@@ -253,6 +278,41 @@ class Ray:
         else:
             raise ValueError("Invalid cast type.")
 
+
+    def cast_refraction(self, map, max_iter=100000):
+
+        current_pos = Vector([self.pos.x, self.pos.y])
+
+        increment_vector = self.dir * 0.1
+
+        while max_iter > 0:
+
+            current_pos += increment_vector
+            prev_pos = current_pos - increment_vector
+
+            try:
+
+                if map[int(current_pos.y)][int(current_pos.x)] == 0: # gone from inside block to outside
+
+                    hit_wall_orientation = None
+                    if int(current_pos.x) != int(
+                        prev_pos.x
+                    ):  # crossed vertical so wall is horizontal
+                        hit_wall_orientation = "horizontal"
+
+                    elif int(current_pos.y) != int(prev_pos.y):
+                        hit_wall_orientation = "vertical"
+
+                    return Hit(current_pos, self, hit_wall_orientation)
+                
+
+            except IndexError:
+                pg.alert(
+                    "System crashed - probably because the entered parameters are too intensive"
+                )
+                exit()
+
+            max_iter -= 1
 
 class Hit:
     def __init__(self, pos, ray, hit_wall_orientation):

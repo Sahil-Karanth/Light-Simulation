@@ -10,18 +10,9 @@ from SettingsWindow import SettingsWindow
 from values import Values
 
 # TODO:
-# - add a specular reflection mode where the ray scatters in a random direction
-# - and make the line drawn a jagged line
-
-# - make intensity follow the inverse square law
-
-# - make intensity drop more when it hits a wall (sudden drop)
-
+# - fix diffuse reflection
 # - add a refraction mode where light refract through drawn on grid locations (but not the outer walls still reflects off these)
 # - add a refractive index to the ray class
-# - snells law
-
-#  - diffraction? interference? TIR?
 
 
 def make_map():
@@ -209,6 +200,58 @@ def check_for_settings_open():
         settings_window = SettingsWindow()
         settings_window.run()
 
+def perform_trace(player, game_map, screen, hit_lst):
+    for hit in hit_lst:
+        draw_fading_ray(
+            screen,
+            player.pos,
+            hit.pos,
+            alpha_start=hit.ray.intensity,
+            alpha_end=hit.ray.intensity / Values.get_value("Decay_Factor"),
+            segments=50,
+        )
+        curr_hit = hit
+
+        if Values.get_value("Reflection_Mode") == "Reflection":
+
+            for _ in range(Values.get_value("Max_Reflections")):
+                new_intensity = curr_hit.ray.intensity / Values.get_value(
+                    "Decay_Factor"
+                )
+
+                if new_intensity < 1:
+                    break
+
+                new_ray = Ray.reflectRay(curr_hit, new_intensity)
+                new_hit = new_ray.cast(game_map, "Primitive")
+
+                draw_fading_ray(
+                    screen,
+                    new_ray.pos,
+                    new_hit.pos,
+                    alpha_start=new_ray.intensity,
+                    alpha_end=new_ray.intensity / Values.get_value("Decay_Factor"),
+                    segments=50,
+                )
+
+                curr_hit = new_hit
+
+        elif Values.get_value("Reflection_Mode") == "Refraction":
+            
+            new_ray = Ray.refractRay(curr_hit, 255)
+
+            new_hit = new_ray.cast_refraction(game_map)
+            
+            draw_fading_ray(
+                screen,
+                new_ray.pos,
+                new_hit.pos,
+                alpha_start=new_ray.intensity,
+                alpha_end=new_ray.intensity / Values.get_value("Decay_Factor"),
+                segments=50,
+            )
+
+            curr_hit = new_hit
 
 def main():
 
@@ -242,8 +285,8 @@ def main():
 
         check_for_settings_open()
 
-        if not frozen:  # Only update if not frozen
-            # Handle player movement
+        if not frozen:
+
             keys = pygame.key.get_pressed()
             mouse_pos = pygame.mouse.get_pos()
 
@@ -259,6 +302,7 @@ def main():
                 ]
             ).normalise()
 
+
             simulate_next_pos = player.pos + next_move
 
             # Check if the next position is a wall
@@ -271,54 +315,8 @@ def main():
             draw_player(screen, player)
 
             hit_lst = Ray.initialRayCast(player, game_map, "primitive")
-            for hit in hit_lst:
-                draw_fading_ray(
-                    screen,
-                    player.pos,
-                    hit.pos,
-                    alpha_start=hit.ray.intensity,
-                    alpha_end=hit.ray.intensity / Values.get_value("Decay_Factor"),
-                    segments=50,
-                )
-                curr_hit = hit
 
-                if Values.get_value("Reflection_Mode") == "Reflection":
-
-                    for _ in range(Values.get_value("Max_Reflections")):
-                        new_intensity = curr_hit.ray.intensity / Values.get_value(
-                            "Decay_Factor"
-                        )
-
-                        if new_intensity < 1:
-                            break
-
-                        new_ray = Ray.reflectRay(curr_hit, new_intensity)
-                        new_hit = new_ray.cast(game_map, "Primitive")
-
-                        draw_fading_ray(
-                            screen,
-                            new_ray.pos,
-                            new_hit.pos,
-                            alpha_start=new_ray.intensity,
-                            alpha_end=new_ray.intensity / Values.get_value("Decay_Factor"),
-                            segments=50,
-                        )
-
-                        curr_hit = new_hit
-
-                elif Values.get_value("Reflection_Mode") == "Refraction":
-                    
-                    new_ray = Ray.refractRay(curr_hit, 255)
-
-                    draw_fading_ray(
-                        screen,
-                        curr_hit.pos,
-                        new_ray.pos,
-                        alpha_start=curr_hit.ray.intensity,
-                        alpha_end=curr_hit.ray.intensity / Values.get_value("Decay_Factor"),
-                        segments=50,
-                    )
-
+            perform_trace(player, game_map, screen, hit_lst)
 
 
         pygame.display.flip()
