@@ -139,12 +139,12 @@ class Ray:
 
     @staticmethod
     def __get_incidence_angle(angle):
-        # angle ranges from -pi to pi
+
         if angle < 0 and angle >= -math.pi / 2:
             return -angle
 
         elif angle < -math.pi / 2 and angle >= -math.pi:
-            return angle + math.pi
+            return math.pi + angle 
 
         elif angle > 0 and angle <= math.pi / 2:
             return angle
