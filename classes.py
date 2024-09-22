@@ -167,11 +167,13 @@ class Ray:
 
         ray_angle = hit.ray.dir.get_angle()
         print(f"Ray angle: {to_degrees(ray_angle)}")
+
+        if not hit.wall_orientation:
+            return
+        
         incident_angle = Ray.__get_incidence_angle(ray_angle, hit.wall_orientation)
 
-        if not incident_angle:
-            print(to_degrees(ray_angle))
-            raise ValueError("Invalid incident angle.")
+
 
         refracted_angle = np.arcsin(
             np.sin(incident_angle) / Values.get_value("Refractive_Index")
