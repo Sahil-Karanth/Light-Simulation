@@ -60,7 +60,7 @@ class SettingsWindow:
 
         layout = [
             [self.__create_slider(1, 100, 1, "Number Of Rays")],
-            [self.__create_slider(1, 20, 1, "Max Reflections")],
+            [self.__create_slider(0, 20, 1, "Max Reflections")],
             [self.__create_slider(1, 5, 0.2, "Decay Factor")],
             [self.__create_slider(10, 360, 1, "Field Of View")],
             [self.__create_toggle_button("Reflection Mode", "Refraction Mode")],

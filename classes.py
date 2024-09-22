@@ -248,9 +248,11 @@ class Ray:
                     hit_wall_orientation = None
                     if int(current_pos.x) != int(prev_pos.x):
                         hit_wall_orientation = "vertical"
+                        print("VERTICAL")
 
                     elif int(current_pos.y) != int(prev_pos.y):
                         hit_wall_orientation = "horizontal"
+                        print("HORIZONTAL")
 
                     return Hit(current_pos, self, hit_wall_orientation)
 
