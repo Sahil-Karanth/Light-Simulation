@@ -277,30 +277,6 @@ def perform_trace(player, game_map, screen, hit_lst):
 
                     curr_hit = exit_hit
 
-    # draw the shadow line connecting the max and min hit points of the fov
-
-    if Values.get_value("Reflection_Mode") == "Reflection" and Values.get_value("Max_Reflections") == 0:
-    
-        max_hit_cords = hit_lst[0].pos
-        min_hit_cords = hit_lst[-1].pos
-
-        # draw line from max to min hit cords
-
-        pygame.draw.line(
-            screen,
-            (255, 255, 255),
-            (
-                max_hit_cords.x * Values.get_value("CELL_SIZE"),
-                max_hit_cords.y * Values.get_value("CELL_SIZE"),
-            ),
-            (
-                min_hit_cords.x * Values.get_value("CELL_SIZE"),
-                min_hit_cords.y * Values.get_value("CELL_SIZE"),
-            ),
-
-            5,
-        )
-
 
 def main():
 
