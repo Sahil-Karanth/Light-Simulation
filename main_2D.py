@@ -13,7 +13,6 @@ from values import Values
 # - fix diffuse reflection
 # - add a refractive index to the ray class and slider to adjust
 # - TIR
-# - shadow indicator for no reflection mode
 
 def make_map():
     width = Values.get_value("SCREEN_WIDTH") // Values.get_value("CELL_SIZE")
@@ -237,7 +236,7 @@ def perform_trace(player, game_map, screen, hit_lst):
 
                 curr_hit = new_hit
 
-        elif Values.get_value("Reflection_Mode") == "Refraction":
+        elif Values.get_value("Reflection_Mode") == "Refraction" and hit.cell_value != 2:
 
             for _ in range(Values.get_value("Max_Reflections")):
             

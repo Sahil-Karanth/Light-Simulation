@@ -185,6 +185,10 @@ class Ray:
         
         incident_angle = Ray.__get_incidence_angle(ray_angle, hit.wall_orientation)
 
+        critical_angle = np.arcsin(1 / Values.get_value("Refractive_Index"))
+
+        if incident_angle > critical_angle:
+            print("TIR")
 
 
         refracted_angle = np.arcsin(
