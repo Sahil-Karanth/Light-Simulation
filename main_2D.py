@@ -252,6 +252,21 @@ def perform_trace(player, game_map, screen, hit_lst):
                 segments=50,
             )
 
+            if new_hit.wall_orientation:
+
+                exit_ray = Ray(new_hit.pos,hit.ray.dir, hit.ray.intensity)
+
+                exit_hit = exit_ray.cast(game_map, "Primitive", refracting=False)
+
+                draw_fading_ray(
+                    screen,
+                    exit_ray.pos,
+                    exit_hit.pos,
+                    alpha_start=exit_ray.intensity,
+                    alpha_end=exit_ray.intensity / Values.get_value("Decay_Factor"),
+                    segments=50,
+                )
+
 
 def main():
 

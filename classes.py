@@ -96,6 +96,19 @@ class Ray:
             if hit:
                 hit_lst.append(hit)
         return hit_lst
+    
+    @staticmethod
+    def get_refraction_exit_ray(hit, new_intensity):
+        if hit.wall_orientation == "horizontal":
+            new_dir = Vector([hit.ray.dir.x, hit.ray.dir.y * -1])
+        elif hit.wall_orientation == "vertical":
+            new_dir = Vector([hit.ray.dir.x * -1, hit.ray.dir.y])
+        else:
+            raise ValueError("Invalid wall orientation.")
+
+        new_ray = Ray(hit.pos, new_dir, new_intensity)
+
+        return new_ray
 
     def __specularReflectRay(hit, new_intensity):
         if hit.wall_orientation == "horizontal":
