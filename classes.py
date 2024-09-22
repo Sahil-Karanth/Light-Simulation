@@ -110,8 +110,6 @@ class Ray:
         return new_ray
 
     def __diffuseReflectRay(hit, new_intensity):
-
-        # CHECK IF I ACC NEED TO SWITHC HORIZONTAL AND VERITCAL
         if hit.wall_orientation == "vertical":
             max_angle = math.pi / 2
             min_angle = 0
@@ -146,13 +144,13 @@ class Ray:
             new_angle = -angle
 
         elif angle < -math.pi / 2 and angle >= -math.pi:
-            new_angle =  math.pi + angle 
+            new_angle = math.pi + angle 
 
         elif angle > 0 and angle <= math.pi / 2:
-            new_angle =  angle
+            new_angle = angle
 
         elif angle > math.pi / 2 and angle <= math.pi:
-            new_angle =  math.pi - angle
+            new_angle = math.pi - angle
 
         else:
             raise ValueError("Invalid angle value.")
@@ -162,53 +160,37 @@ class Ray:
         
         elif wall_orientation == "horizontal":
             return math.pi / 2 - new_angle
-            
-    
 
     @staticmethod
     def refractRay(hit, new_intensity):
 
         ray_angle = hit.ray.dir.get_angle()
-        # print(f"Ray angle: {ray_angle}")
         incident_angle = Ray.__get_incidence_angle(ray_angle, hit.wall_orientation)
-        # print(f"Incident angle: {incident_angle}")
         refracted_angle = np.arcsin(
             np.sin(incident_angle) / Values.get_value("Refractive_Index")
         )
 
-        # print(f"Refracted angle: {refracted_angle}")
         print(f"Incident angle: {to_degrees(incident_angle)}")
 
+        # Calculate the new direction based on the refracted angle
         if hit.wall_orientation == "vertical":
-            if ray_angle < 0:
-                refracted_angle *= -1 if ray_angle >= -math.pi / 2 else -1 * (math.pi - refracted_angle)
-            elif ray_angle > 0 and ray_angle <= math.pi / 2:
-                pass  # No change needed
-            elif ray_angle > math.pi / 2:
-                refracted_angle = math.pi - refracted_angle
-
+            new_dir = Vector([
+                math.cos(refracted_angle) * (-1 if hit.ray.dir.x < 0 else 1),
+                math.sin(refracted_angle) * (-1 if hit.ray.dir.y < 0 else 1)
+            ])
         elif hit.wall_orientation == "horizontal":
-            if ray_angle < 0:
-                refracted_angle = -1 * (math.pi / 2 - refracted_angle) if ray_angle >= -math.pi / 2 else -1 * (math.pi / 2 + refracted_angle)
-            elif ray_angle > 0 and ray_angle <= math.pi / 2:
-                refracted_angle = math.pi / 2 - refracted_angle
-            elif ray_angle > math.pi / 2:
-                refracted_angle = math.pi / 2 + refracted_angle
-
-
-
-        new_dir = Vector([math.cos(refracted_angle), math.sin(refracted_angle)])
+            new_dir = Vector([
+                math.sin(refracted_angle) * (-1 if hit.ray.dir.x < 0 else 1),
+                math.cos(refracted_angle) * (-1 if hit.ray.dir.y < 0 else 1)
+            ])
 
         new_ray = Ray(hit.pos, new_dir, new_intensity)
 
         return new_ray
-        
-
 
     def cast_dda(self, map, max_dist=20):
         current_pos = Vector([self.pos.x, self.pos.y])
 
-        # Calculate the step size and initial ray steps (DDA algorithm)
         delta_dist_x = abs(1 / self.dir.x) if self.dir.x != 0 else float("inf")
         delta_dist_y = abs(1 / self.dir.y) if self.dir.y != 0 else float("inf")
 
@@ -226,7 +208,6 @@ class Ray:
             else (self.pos.y - math.floor(self.pos.y)) * delta_dist_y
         )
 
-        # DDA loop to step through grid cells
         while max_dist > 0:
             if side_dist_x < side_dist_y:
                 side_dist_x += delta_dist_x
@@ -237,10 +218,7 @@ class Ray:
 
             max_dist -= 1
 
-            # Check if we hit a wall
-
             try:
-
                 if map[int(current_pos.y)][int(current_pos.x)]:
                     return current_pos  # Return the hit position
 
@@ -251,7 +229,7 @@ class Ray:
 
         return None  # No collision within max_dist
 
-    def cast_primitive(self, map, refracting, max_iter=100000,):
+    def cast_primitive(self, map, refracting, max_iter=100000):
 
         current_pos = Vector([self.pos.x, self.pos.y])
 
@@ -265,12 +243,10 @@ class Ray:
             prev_pos = current_pos - increment_vector
 
             try:
-                if map[int(current_pos.y)][int(current_pos.x)] == stop_condition or map[int(current_pos.y)][int(current_pos.x)] == 2:  # gone from inside block to outside
+                if map[int(current_pos.y)][int(current_pos.x)] == stop_condition or map[int(current_pos.y)][int(current_pos.x)] == 2:
 
                     hit_wall_orientation = None
-                    if int(current_pos.x) != int(
-                        prev_pos.x
-                    ):  # crossed vertical so wall is horizontal
+                    if int(current_pos.x) != int(prev_pos.x):
                         hit_wall_orientation = "vertical"
 
                     elif int(current_pos.y) != int(prev_pos.y):
