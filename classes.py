@@ -5,6 +5,8 @@ import pyautogui as pg
 
 from values import Values
 
+def to_degrees(rad):
+    return rad * 180 / math.pi
 
 class Vector:
     def __init__(self, lst):
@@ -138,52 +140,70 @@ class Ray:
             return Ray.__diffuseReflectRay(hit, new_intensity)
 
     @staticmethod
-    def __get_incidence_angle(angle):
+    def __get_incidence_angle(angle, wall_orientation):
 
         if angle < 0 and angle >= -math.pi / 2:
-            return -angle
+            new_angle = -angle
 
         elif angle < -math.pi / 2 and angle >= -math.pi:
-            return math.pi + angle 
+            new_angle =  math.pi + angle 
 
         elif angle > 0 and angle <= math.pi / 2:
-            return angle
+            new_angle =  angle
 
         elif angle > math.pi / 2 and angle <= math.pi:
-            return math.pi - angle
+            new_angle =  math.pi - angle
 
         else:
             raise ValueError("Invalid angle value.")
+        
+        if wall_orientation == "vertical":
+            return new_angle
+        
+        elif wall_orientation == "horizontal":
+            return math.pi / 2 - new_angle
+            
+    
 
     @staticmethod
     def refractRay(hit, new_intensity):
 
         ray_angle = hit.ray.dir.get_angle()
         # print(f"Ray angle: {ray_angle}")
-        incident_angle = Ray.__get_incidence_angle(ray_angle)
+        incident_angle = Ray.__get_incidence_angle(ray_angle, hit.wall_orientation)
         # print(f"Incident angle: {incident_angle}")
         refracted_angle = np.arcsin(
             np.sin(incident_angle) / Values.get_value("Refractive_Index")
         )
 
-        if ray_angle < 0 and ray_angle >= -math.pi / 2:
-            refracted_angle *= -1
-        
-        elif ray_angle < -math.pi / 2 and ray_angle >= -math.pi:
-            refracted_angle = math.pi - refracted_angle
-            refracted_angle *= -1
+        # print(f"Refracted angle: {refracted_angle}")
+        print(f"Incident angle: {to_degrees(incident_angle)}")
 
-        elif ray_angle > 0 and ray_angle <= math.pi / 2:
-            pass
+        if hit.wall_orientation == "vertical":
+            if ray_angle < 0:
+                refracted_angle *= -1 if ray_angle >= -math.pi / 2 else -1 * (math.pi - refracted_angle)
+            elif ray_angle > 0 and ray_angle <= math.pi / 2:
+                pass  # No change needed
+            elif ray_angle > math.pi / 2:
+                refracted_angle = math.pi - refracted_angle
 
-        elif ray_angle > math.pi / 2 and ray_angle <= math.pi:
-            refracted_angle = math.pi - refracted_angle
+        elif hit.wall_orientation == "horizontal":
+            if ray_angle < 0:
+                refracted_angle = -1 * (math.pi / 2 - refracted_angle) if ray_angle >= -math.pi / 2 else -1 * (math.pi / 2 + refracted_angle)
+            elif ray_angle > 0 and ray_angle <= math.pi / 2:
+                refracted_angle = math.pi / 2 - refracted_angle
+            elif ray_angle > math.pi / 2:
+                refracted_angle = math.pi / 2 + refracted_angle
+
+
 
         new_dir = Vector([math.cos(refracted_angle), math.sin(refracted_angle)])
 
         new_ray = Ray(hit.pos, new_dir, new_intensity)
 
         return new_ray
+        
+
 
     def cast_dda(self, map, max_dist=20):
         current_pos = Vector([self.pos.x, self.pos.y])
