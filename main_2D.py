@@ -238,34 +238,38 @@ def perform_trace(player, game_map, screen, hit_lst):
                 curr_hit = new_hit
 
         elif Values.get_value("Reflection_Mode") == "Refraction":
+
+            for _ in range(Values.get_value("Max_Reflections")):
             
-            new_ray = Ray.refractRay(curr_hit, 255)
+                new_ray = Ray.refractRay(curr_hit, 255)
 
-            new_hit = new_ray.cast(game_map, "Primitive", refracting=True)
-            
-            draw_fading_ray(
-                screen,
-                new_ray.pos,
-                new_hit.pos,
-                alpha_start=new_ray.intensity,
-                alpha_end=new_ray.intensity / Values.get_value("Decay_Factor"),
-                segments=50,
-            )
-
-            if new_hit.wall_orientation:
-
-                exit_ray = Ray(new_hit.pos,hit.ray.dir, hit.ray.intensity)
-
-                exit_hit = exit_ray.cast(game_map, "Primitive", refracting=False)
-
+                new_hit = new_ray.cast(game_map, "Primitive", refracting=True)
+                
                 draw_fading_ray(
                     screen,
-                    exit_ray.pos,
-                    exit_hit.pos,
-                    alpha_start=exit_ray.intensity,
-                    alpha_end=exit_ray.intensity / Values.get_value("Decay_Factor"),
+                    new_ray.pos,
+                    new_hit.pos,
+                    alpha_start=new_ray.intensity,
+                    alpha_end=new_ray.intensity / Values.get_value("Decay_Factor"),
                     segments=50,
                 )
+
+                if new_hit.wall_orientation:
+
+                    exit_ray = Ray(new_hit.pos,hit.ray.dir, hit.ray.intensity)
+
+                    exit_hit = exit_ray.cast(game_map, "Primitive", refracting=False)
+
+                    draw_fading_ray(
+                        screen,
+                        exit_ray.pos,
+                        exit_hit.pos,
+                        alpha_start=exit_ray.intensity,
+                        alpha_end=exit_ray.intensity / Values.get_value("Decay_Factor"),
+                        segments=50,
+                    )
+
+                    curr_hit = exit_hit
 
 
 def main():

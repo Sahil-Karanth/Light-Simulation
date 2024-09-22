@@ -97,18 +97,6 @@ class Ray:
                 hit_lst.append(hit)
         return hit_lst
     
-    @staticmethod
-    def get_refraction_exit_ray(hit, new_intensity):
-        if hit.wall_orientation == "horizontal":
-            new_dir = Vector([hit.ray.dir.x, hit.ray.dir.y * -1])
-        elif hit.wall_orientation == "vertical":
-            new_dir = Vector([hit.ray.dir.x * -1, hit.ray.dir.y])
-        else:
-            raise ValueError("Invalid wall orientation.")
-
-        new_ray = Ray(hit.pos, new_dir, new_intensity)
-
-        return new_ray
 
     def __specularReflectRay(hit, new_intensity):
         if hit.wall_orientation == "horizontal":
@@ -178,12 +166,17 @@ class Ray:
     def refractRay(hit, new_intensity):
 
         ray_angle = hit.ray.dir.get_angle()
+        print(f"Ray angle: {to_degrees(ray_angle)}")
         incident_angle = Ray.__get_incidence_angle(ray_angle, hit.wall_orientation)
+
+        if not incident_angle:
+            print(to_degrees(ray_angle))
+            raise ValueError("Invalid incident angle.")
+
         refracted_angle = np.arcsin(
             np.sin(incident_angle) / Values.get_value("Refractive_Index")
         )
 
-        print(f"Incident angle: {to_degrees(incident_angle)}")
 
         # Calculate the new direction based on the refracted angle
         if hit.wall_orientation == "vertical":
