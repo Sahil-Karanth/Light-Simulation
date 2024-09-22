@@ -111,7 +111,7 @@ class Ray:
         return hit_lst
     
 
-    def __specularReflectRay(hit, new_intensity):
+    def __specularReflectRay(hit, new_intensity, TIR=False):
         if hit.wall_orientation == "horizontal":
             new_dir = Vector([hit.ray.dir.x, hit.ray.dir.y * -1])
         elif hit.wall_orientation == "vertical":
@@ -187,8 +187,9 @@ class Ray:
 
         critical_angle = np.arcsin(1 / Values.get_value("Refractive_Index"))
 
-        if incident_angle > critical_angle:
+        if incident_angle > critical_angle and hit.prev_cell_value == 0 and hit.cell_value == 1:
             print("TIR")
+            return Ray.__specularReflectRay(hit, new_intensity, TIR=True)
 
 
         refracted_angle = np.arcsin(
@@ -307,7 +308,9 @@ class Ray:
                         hit_wall_orientation = "horizontal"
                         print("HORIZONTAL")
 
-                    return Hit(current_pos, self, hit_wall_orientation, cell_value)
+                    prev_cell_value = map[int(prev_pos.y)][int(prev_pos.x)]
+
+                    return Hit(current_pos, self, hit_wall_orientation, cell_value, prev_cell_value)
 
             except IndexError:
                 pg.alert(
@@ -327,8 +330,9 @@ class Ray:
 
 
 class Hit:
-    def __init__(self, pos, ray, hit_wall_orientation, cell_value):
+    def __init__(self, pos, ray, hit_wall_orientation, cell_value, prev_cell_value):
         self.pos = pos
         self.wall_orientation = hit_wall_orientation
         self.ray = ray
         self.cell_value = cell_value
+        self.prev_cell_value = prev_cell_value
