@@ -11,9 +11,9 @@ from values import Values
 
 # TODO:
 # - fix diffuse reflection
-# - add a refraction mode where light refract through drawn on grid locations (but not the outer walls still reflects off these)
-# - add a refractive index to the ray class
-
+# - add a refractive index to the ray class and slider to adjust
+# - TIR
+# - shadow indicator for no reflection mode
 
 def make_map():
     width = Values.get_value("SCREEN_WIDTH") // Values.get_value("CELL_SIZE")
@@ -247,6 +247,9 @@ def perform_trace(player, game_map, screen, hit_lst):
                     break
 
                 new_hit = new_ray.cast(game_map, "Primitive", refracting=True)
+
+                if new_hit.cell_value == 2:
+                    break
                 
                 draw_fading_ray(
                     screen,
@@ -273,6 +276,30 @@ def perform_trace(player, game_map, screen, hit_lst):
                     )
 
                     curr_hit = exit_hit
+
+    # draw the shadow line connecting the max and min hit points of the fov
+
+    if Values.get_value("Reflection_Mode") == "Reflection" and Values.get_value("Max_Reflections") == 0:
+    
+        max_hit_cords = hit_lst[0].pos
+        min_hit_cords = hit_lst[-1].pos
+
+        # draw line from max to min hit cords
+
+        pygame.draw.line(
+            screen,
+            (255, 255, 255),
+            (
+                max_hit_cords.x * Values.get_value("CELL_SIZE"),
+                max_hit_cords.y * Values.get_value("CELL_SIZE"),
+            ),
+            (
+                min_hit_cords.x * Values.get_value("CELL_SIZE"),
+                min_hit_cords.y * Values.get_value("CELL_SIZE"),
+            ),
+
+            5,
+        )
 
 
 def main():

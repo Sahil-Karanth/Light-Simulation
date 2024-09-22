@@ -80,12 +80,9 @@ class Ray:
 
     @staticmethod
     def initialRayCast(player, map, cast_type):
-        hit_lst = []
-        for angle in np.linspace(
-            -player.fov / 2, player.fov / 2, Values.get_value("Number_Of_Rays")
-        ):
-            ray = Ray(player.pos, player.dir.rotate(angle))
 
+        def loop_code(ray):
+    
             if cast_type == "primitive":
                 hit = ray.cast_primitive(map, refracting=False)
             elif cast_type == "dda":
@@ -94,7 +91,23 @@ class Ray:
                 raise ValueError("Invalid cast type.")
 
             if hit:
-                hit_lst.append(hit)
+                return hit
+
+        num_rays = Values.get_value("Number_Of_Rays")
+
+        if num_rays == 1:
+            ray = Ray(player.pos, player.dir)
+            return [loop_code(ray)]
+
+        hit_lst = []
+
+        for angle in np.linspace(
+            -player.fov / 2, player.fov / 2, num_rays
+        ):
+            ray = Ray(player.pos, player.dir.rotate(angle))
+
+            hit_lst.append(loop_code(ray))
+
         return hit_lst
     
 
@@ -166,7 +179,6 @@ class Ray:
     def refractRay(hit, new_intensity):
 
         ray_angle = hit.ray.dir.get_angle()
-        print(f"Ray angle: {to_degrees(ray_angle)}")
 
         if not hit.wall_orientation:
             return
@@ -245,13 +257,42 @@ class Ray:
 
         stop_condition = 0 if refracting else 1
 
+        last_x_crossing = None
+        last_y_crossing = None
+
         while max_iter > 0:
 
             current_pos += increment_vector
             prev_pos = current_pos - increment_vector
 
+            if int(current_pos.x) != int(prev_pos.x):
+                last_x_crossing = current_pos
+
+            if int(current_pos.y) != int(prev_pos.y):
+                last_y_crossing = current_pos
+
             try:
-                if map[int(current_pos.y)][int(current_pos.x)] == stop_condition or map[int(current_pos.y)][int(current_pos.x)] == 2:
+                cell_value = map[int(current_pos.y)][int(current_pos.x)]
+                if cell_value == stop_condition or cell_value == 2:
+                
+                    
+
+                    # the distance from the last axis crossing to the current position must be calculated
+
+                    # dist = 0
+
+                    # if last_x_crossing:
+                    #     dist = math.sqrt(
+                    #         (current_pos.x - last_x_crossing.x) ** 2
+                    #         + (current_pos.y - last_x_crossing.y) ** 2
+                    #     )
+
+                    # elif last_y_crossing:
+                    #     dist = math.sqrt(
+                    #         (current_pos.x - last_y_crossing.x) ** 2
+                    #         + (current_pos.y - last_y_crossing.y) ** 2
+                    #     )
+
 
                     hit_wall_orientation = None
                     if int(current_pos.x) != int(prev_pos.x):
@@ -262,7 +303,7 @@ class Ray:
                         hit_wall_orientation = "horizontal"
                         print("HORIZONTAL")
 
-                    return Hit(current_pos, self, hit_wall_orientation)
+                    return Hit(current_pos, self, hit_wall_orientation, cell_value)
 
             except IndexError:
                 pg.alert(
@@ -282,7 +323,8 @@ class Ray:
 
 
 class Hit:
-    def __init__(self, pos, ray, hit_wall_orientation):
+    def __init__(self, pos, ray, hit_wall_orientation, cell_value):
         self.pos = pos
         self.wall_orientation = hit_wall_orientation
         self.ray = ray
+        self.cell_value = cell_value
