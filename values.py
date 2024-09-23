@@ -21,7 +21,6 @@ class Values:
 
         "Reflection_Mode": "reflection",
         "Reflection_Type": "specular",
-        "Cast_Type": "Primitive_Cast"
     }
 
     def get_value(key):
@@ -39,10 +38,6 @@ class Values:
             Values.set_value("Reflection_Type", "Specular")
         elif value == "Diffuse_Reflection":
             Values.set_value("Reflection_Type", "Diffuse")
-        elif value == "Primitive_Cast":
-            Values.set_value("Cast_Type", "Primitive_Cast")
-        elif value == "DDA_Cast":
-            Values.set_value("Cast_Type", "DDA_Cast")
         else:
             raise ValueError("Invalid toggle value.")
     

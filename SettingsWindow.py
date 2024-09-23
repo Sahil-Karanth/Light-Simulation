@@ -11,13 +11,11 @@ class SettingsWindow:
         "Refraction_Mode": "Reflection_Mode",
         "Specular_Reflection": "Diffuse_Reflection",
         "Diffuse_Reflection": "Specular_Reflection",
-        "Primitive_Cast": "DDA_Cast",
-        "DDA_Cast": "Primitive_Cast"
     }
 
     def __init__(self):
         self.window = sg.Window("Settings", self.__create_layout())
-        self.selected_buttons = ["Reflection_Mode", "Specular_Reflection", "Primitive_Cast"]
+        self.selected_buttons = ["Reflection_Mode", "Specular_Reflection"]
 
     def __create_slider(self, min_value, max_value, step, label):
 
@@ -65,7 +63,6 @@ class SettingsWindow:
             [self.__create_slider(10, 360, 1, "Field Of View")],
             [self.__create_toggle_button("Reflection Mode", "Refraction Mode")],
             [self.__create_toggle_button("Specular Reflection", "Diffuse Reflection")],
-            [self.__create_toggle_button("Primitive Cast", "DDA Cast")],
             [apply_button]
         ]
 

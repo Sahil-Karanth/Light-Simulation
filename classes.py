@@ -83,16 +83,11 @@ class Ray:
         return f"r = {self.pos.values} + t{self.dir.values}"
 
     @staticmethod
-    def initialRayCast(player, map, cast_type):
+    def initialRayCast(player, map):
 
         def loop_code(ray):
     
-            if cast_type == "Primitive_Cast":
-                hit = ray.cast_primitive(map, refracting=False)
-            elif cast_type == "DDA_Cast":
-                hit = ray.cast_dda(map)
-            else:
-                raise ValueError("Invalid cast type.")
+            hit = ray.cast(map, refracting=False)
 
             if hit:
                 return hit
@@ -217,40 +212,7 @@ class Ray:
 
         return new_ray
 
-    def cast_dda(self, map):
-
-        current_pos = Vector([self.pos.x, self.pos.y])
-
-        x, y = int(current_pos.x), int(current_pos.y)
-
-        delta_dist_x = abs(1 / self.dir.x) if self.dir.x != 0 else 0
-        delta_dist_y = abs(1 / self.dir.y) if self.dir.y != 0 else 0
-
-        step_x = 1 if self.dir.x > 0 else -1
-        step_y = 1 if self.dir.y > 0 else -1
-
-        side_dist_x = (x + 1 - current_pos.x) * delta_dist_x
-        side_dist_y = (y + 1 - current_pos.y) * delta_dist_y
-
-        hit = None
-
-        while not hit:
-
-            if side_dist_x < side_dist_y:
-                side_dist_x += delta_dist_x
-                x += step_x
-                side = "vertical"
-            else:
-                side_dist_y += delta_dist_y
-                y += step_y
-                side = "horizontal"
-
-            if map[y][x] == 1:
-                hit = Hit(Vector([x, y]), self, side, 1, 0)
-
-        return hit
-
-    def cast_primitive(self, map, refracting, max_iter=100000):
+    def cast(self, map, refracting, max_iter=100000):
         def handle_hit(current_pos, prev_pos, map):
             hit_wall_orientation = None
 
@@ -299,15 +261,6 @@ class Ray:
                 exit()
 
             max_iter -= 1
-
-
-    def cast(self, game_map, cast_type, refracting):
-        if cast_type == "Primitive_Cast":
-            return self.cast_primitive(game_map, refracting)
-        elif cast_type == "DDA_Cast":
-            return self.cast_dda(game_map)
-        else:
-            raise ValueError("Invalid cast type.")
 
 
 class Hit:

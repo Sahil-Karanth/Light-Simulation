@@ -223,7 +223,7 @@ def perform_trace(player, game_map, screen, hit_lst):
 
 
                 new_ray = Ray.reflectRay(curr_hit, new_intensity)
-                new_hit = new_ray.cast(game_map, Values.get_value("Cast_Type"), refracting=False)
+                new_hit = new_ray.cast(game_map, refracting=False)
 
                 draw_fading_ray(
                     screen,
@@ -245,7 +245,7 @@ def perform_trace(player, game_map, screen, hit_lst):
                 if not new_ray:
                     break
 
-                new_hit = new_ray.cast(game_map, Values.get_value("Cast_Type"), refracting=True)
+                new_hit = new_ray.cast(game_map, refracting=True)
 
                 if new_hit.cell_value == 2:
                     break
@@ -263,7 +263,7 @@ def perform_trace(player, game_map, screen, hit_lst):
 
                     exit_ray = Ray(new_hit.pos,hit.ray.dir, hit.ray.intensity)
 
-                    exit_hit = exit_ray.cast(game_map, Values.get_value("Cast_Type"), refracting=False)
+                    exit_hit = exit_ray.cast(game_map, refracting=False)
 
                     draw_fading_ray(
                         screen,
@@ -338,7 +338,7 @@ def main():
             draw_map(screen, game_map)
             draw_player(screen, player)
 
-            hit_lst = Ray.initialRayCast(player, game_map, Values.get_value("Cast_Type"))
+            hit_lst = Ray.initialRayCast(player, game_map)
 
             perform_trace(player, game_map, screen, hit_lst)
 
