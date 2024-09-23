@@ -254,8 +254,8 @@ class Ray:
 
         current_pos = Vector([self.pos.x, self.pos.y])
 
-        increment_vector = self.dir * 0.001
-        # increment_vector = self.dir * 0.1
+        # increment_vector = self.dir * 0.001
+        increment_vector = self.dir * 0.1
 
         stop_condition = 0 if refracting else 1
 
@@ -271,29 +271,43 @@ class Ray:
                 
                     hit_wall_orientation = None
 
-                    # if int(current_pos.y) != int(prev_pos.y) and int(current_pos.x) != int(prev_pos.x):
-                        
-                    #     # check which cell is closer
-                    #     dist_x = abs(prev_pos.x - current_pos.x)
-                    #     dist_y = abs(prev_pos.y - current_pos.y)
+                    if int(current_pos.y) != int(prev_pos.y) and int(current_pos.x) != int(prev_pos.x):
 
-                    #     if dist_x < dist_y:
-                    #         hit_wall_orientation = "horizontal"
-                    #         print("corner horizontal")
+                        # edge between two cells hit
+                        print("corner hit")
 
-                    #     else:
-                    #         hit_wall_orientation = "vertical"
-                    #         print("corner vertical")
+                        # backtrack and increase step resolution
+                        current_pos -= increment_vector
+                        increment_vector *= 0.01
+
+                        while True:
+
+                            current_pos += increment_vector
+                            prev_pos = current_pos - increment_vector
+
+                            cell_value = map[int(current_pos.y)][int(current_pos.x)]
+
+                            if cell_value == stop_condition or cell_value == 2:
+
+                                if int(current_pos.x) != int(prev_pos.x):
+                                    hit_wall_orientation = "vertical"
+                                    print("vertical")
+
+                                elif int(current_pos.y) != int(prev_pos.y):
+                                    hit_wall_orientation = "horizontal"
+                                    print("horizontal")
+
+                                prev_cell_value = map[int(prev_pos.y)][int(prev_pos.x)]
+
+                                return Hit(current_pos, self, hit_wall_orientation, cell_value, prev_cell_value)
 
 
                     if int(current_pos.x) != int(prev_pos.x):
                         hit_wall_orientation = "vertical"
-                        # print(f"{colorama.Fore.GREEN}{current_pos}{colorama.Style.RESET_ALL} {colorama.Fore.GREEN}{prev_pos}{colorama.Style.RESET_ALL}")
                         print("vertical")
 
                     elif int(current_pos.y) != int(prev_pos.y):
                         hit_wall_orientation = "horizontal"
-                        # print(f"{colorama.Fore.RED}{current_pos}{colorama.Style.RESET_ALL} {colorama.Fore.RED}{prev_pos}{colorama.Style.RESET_ALL}")
                         print("horizontal")
 
                     prev_cell_value = map[int(prev_pos.y)][int(prev_pos.x)]
