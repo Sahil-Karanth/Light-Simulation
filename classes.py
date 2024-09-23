@@ -2,8 +2,12 @@ import math
 
 import numpy as np
 import pyautogui as pg
+import colorama
 
 from values import Values
+
+colorama.init()
+
 
 def to_degrees(rad):
     return rad * 180 / math.pi
@@ -83,9 +87,9 @@ class Ray:
 
         def loop_code(ray):
     
-            if cast_type == "primitive":
+            if cast_type == "Primitive_Cast":
                 hit = ray.cast_primitive(map, refracting=False)
-            elif cast_type == "dda":
+            elif cast_type == "DDA_Cast":
                 hit = ray.cast_dda(map)
             else:
                 raise ValueError("Invalid cast type.")
@@ -185,11 +189,11 @@ class Ray:
         
         incident_angle = Ray.__get_incidence_angle(ray_angle, hit.wall_orientation)
 
-        critical_angle = np.arcsin(1 / Values.get_value("Refractive_Index"))
+        # critical_angle = np.arcsin(1 / Values.get_value("Refractive_Index"))
 
-        if incident_angle > critical_angle and hit.prev_cell_value == 0 and hit.cell_value == 1:
-            print("TIR")
-            return Ray.__specularReflectRay(hit, new_intensity, TIR=True)
+        # if incident_angle > critical_angle and hit.prev_cell_value == 0 and hit.cell_value == 1:
+        #     print("TIR")
+        #     return Ray.__specularReflectRay(hit, new_intensity, TIR=True)
 
 
         refracted_angle = np.arcsin(
@@ -213,100 +217,84 @@ class Ray:
 
         return new_ray
 
-    def cast_dda(self, map, max_dist=20):
+    def cast_dda(self, map):
+
         current_pos = Vector([self.pos.x, self.pos.y])
 
-        delta_dist_x = abs(1 / self.dir.x) if self.dir.x != 0 else float("inf")
-        delta_dist_y = abs(1 / self.dir.y) if self.dir.y != 0 else float("inf")
+        x, y = int(current_pos.x), int(current_pos.y)
+
+        delta_dist_x = abs(1 / self.dir.x) if self.dir.x != 0 else 0
+        delta_dist_y = abs(1 / self.dir.y) if self.dir.y != 0 else 0
 
         step_x = 1 if self.dir.x > 0 else -1
         step_y = 1 if self.dir.y > 0 else -1
 
-        side_dist_x = (
-            (math.ceil(self.pos.x) - self.pos.x) * delta_dist_x
-            if step_x > 0
-            else (self.pos.x - math.floor(self.pos.x)) * delta_dist_x
-        )
-        side_dist_y = (
-            (math.ceil(self.pos.y) - self.pos.y) * delta_dist_y
-            if step_y > 0
-            else (self.pos.y - math.floor(self.pos.y)) * delta_dist_y
-        )
+        side_dist_x = (x + 1 - current_pos.x) * delta_dist_x
+        side_dist_y = (y + 1 - current_pos.y) * delta_dist_y
 
-        while max_dist > 0:
+        hit = None
+
+        while not hit:
+
             if side_dist_x < side_dist_y:
                 side_dist_x += delta_dist_x
-                current_pos.x += step_x
+                x += step_x
+                side = "vertical"
             else:
                 side_dist_y += delta_dist_y
-                current_pos.y += step_y
+                y += step_y
+                side = "horizontal"
 
-            max_dist -= 1
+            if map[y][x] == 1:
+                hit = Hit(Vector([x, y]), self, side, 1, 0)
 
-            try:
-                if map[int(current_pos.y)][int(current_pos.x)]:
-                    return current_pos  # Return the hit position
-
-            except IndexError:
-                pg.alert(
-                    "System crashed - probably because the entered parameters are too intensive"
-                )
-
-        return None  # No collision within max_dist
+        return hit
 
     def cast_primitive(self, map, refracting, max_iter=100000):
 
         current_pos = Vector([self.pos.x, self.pos.y])
 
-        increment_vector = self.dir * 0.1
+        increment_vector = self.dir * 0.001
+        # increment_vector = self.dir * 0.1
 
         stop_condition = 0 if refracting else 1
 
-        last_x_crossing = None
-        last_y_crossing = None
 
         while max_iter > 0:
 
             current_pos += increment_vector
             prev_pos = current_pos - increment_vector
 
-            if int(current_pos.x) != int(prev_pos.x):
-                last_x_crossing = current_pos
-
-            if int(current_pos.y) != int(prev_pos.y):
-                last_y_crossing = current_pos
-
             try:
                 cell_value = map[int(current_pos.y)][int(current_pos.x)]
                 if cell_value == stop_condition or cell_value == 2:
                 
-                    
-
-                    # the distance from the last axis crossing to the current position must be calculated
-
-                    # dist = 0
-
-                    # if last_x_crossing:
-                    #     dist = math.sqrt(
-                    #         (current_pos.x - last_x_crossing.x) ** 2
-                    #         + (current_pos.y - last_x_crossing.y) ** 2
-                    #     )
-
-                    # elif last_y_crossing:
-                    #     dist = math.sqrt(
-                    #         (current_pos.x - last_y_crossing.x) ** 2
-                    #         + (current_pos.y - last_y_crossing.y) ** 2
-                    #     )
-
-
                     hit_wall_orientation = None
+
+                    # if int(current_pos.y) != int(prev_pos.y) and int(current_pos.x) != int(prev_pos.x):
+                        
+                    #     # check which cell is closer
+                    #     dist_x = abs(prev_pos.x - current_pos.x)
+                    #     dist_y = abs(prev_pos.y - current_pos.y)
+
+                    #     if dist_x < dist_y:
+                    #         hit_wall_orientation = "horizontal"
+                    #         print("corner horizontal")
+
+                    #     else:
+                    #         hit_wall_orientation = "vertical"
+                    #         print("corner vertical")
+
+
                     if int(current_pos.x) != int(prev_pos.x):
                         hit_wall_orientation = "vertical"
-                        print("VERTICAL")
+                        # print(f"{colorama.Fore.GREEN}{current_pos}{colorama.Style.RESET_ALL} {colorama.Fore.GREEN}{prev_pos}{colorama.Style.RESET_ALL}")
+                        print("vertical")
 
                     elif int(current_pos.y) != int(prev_pos.y):
                         hit_wall_orientation = "horizontal"
-                        print("HORIZONTAL")
+                        # print(f"{colorama.Fore.RED}{current_pos}{colorama.Style.RESET_ALL} {colorama.Fore.RED}{prev_pos}{colorama.Style.RESET_ALL}")
+                        print("horizontal")
 
                     prev_cell_value = map[int(prev_pos.y)][int(prev_pos.x)]
 
@@ -321,9 +309,9 @@ class Ray:
             max_iter -= 1
 
     def cast(self, game_map, cast_type, refracting):
-        if cast_type == "Primitive":
+        if cast_type == "Primitive_Cast":
             return self.cast_primitive(game_map, refracting)
-        elif cast_type == "DDA":
+        elif cast_type == "DDA_Cast":
             return self.cast_dda(game_map)
         else:
             raise ValueError("Invalid cast type.")
