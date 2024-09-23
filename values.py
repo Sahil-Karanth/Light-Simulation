@@ -8,8 +8,8 @@ class Values:
     values = {
         # fixed
         "CELL_SIZE": CELL_SIZE,
-        "SCREEN_WIDTH": CELL_SIZE * 14,
-        "SCREEN_HEIGHT": CELL_SIZE * 14,
+        "SCREEN_WIDTH": CELL_SIZE * 20,
+        "SCREEN_HEIGHT": CELL_SIZE * 20,
         "MOVEMENT_SPEED": 0.8,
         "Refractive_Index": 2,
 
