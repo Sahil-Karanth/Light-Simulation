@@ -31,17 +31,16 @@ def load_map(file):
         return [[int(cell) for cell in line if cell != "\n"] for line in file]
 
 
-def draw_grid_cell(screen, x, y):
+def draw_grid_cell(screen, x, y, fill_color):
     pygame.draw.rect(
         screen,
-        (255, 255, 255),
+        fill_color,
         (
             x * Values.get_value("CELL_SIZE"),
             y * Values.get_value("CELL_SIZE"),
             Values.get_value("CELL_SIZE"),
             Values.get_value("CELL_SIZE"),
         ),
-        1,
     )
 
 
@@ -189,8 +188,16 @@ def update_player_rotation(keys, player):
 def draw_map(screen, game_map):
     for y, row in enumerate(game_map):
         for x, cell in enumerate(row):
-            if cell:
-                draw_grid_cell(screen, x, y)
+            if cell == 1:
+            
+                if Values.get_value("Reflection_Mode") == "Reflection":
+                    draw_grid_cell(screen, x, y, fill_color=(200, 200, 200))
+
+                elif Values.get_value("Reflection_Mode") == "Refraction":
+                    draw_grid_cell(screen, x, y, fill_color=(0, 0, 139))
+
+            elif cell == 2:
+                draw_grid_cell(screen, x, y, fill_color=(200, 200, 200))                
 
 
 def check_for_settings_open():
@@ -290,6 +297,8 @@ def main():
     pygame.display.set_caption(
         "Raycasting | press 'p' to open settings | press 'f' to freeze (good for diffuse)"
     )
+
+    screen.fill((0, 0, 0))
 
     player = Player([4.5, 4.5], [0, -1])
 
