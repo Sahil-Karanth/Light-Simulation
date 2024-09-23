@@ -251,76 +251,55 @@ class Ray:
         return hit
 
     def cast_primitive(self, map, refracting, max_iter=100000):
+        def handle_hit(current_pos, prev_pos, map):
+            hit_wall_orientation = None
+
+            if int(current_pos.x) != int(prev_pos.x):
+                hit_wall_orientation = "vertical"
+                print("vertical")
+            elif int(current_pos.y) != int(prev_pos.y):
+                hit_wall_orientation = "horizontal"
+                print("horizontal")
+
+            prev_cell_value = map[int(prev_pos.y)][int(prev_pos.x)]
+            return Hit(current_pos, self, hit_wall_orientation, map[int(current_pos.y)][int(current_pos.x)], prev_cell_value)
 
         current_pos = Vector([self.pos.x, self.pos.y])
-
-        # increment_vector = self.dir * 0.001
         increment_vector = self.dir * 0.1
-
         stop_condition = 0 if refracting else 1
 
-
         while max_iter > 0:
-
             current_pos += increment_vector
             prev_pos = current_pos - increment_vector
 
             try:
                 cell_value = map[int(current_pos.y)][int(current_pos.x)]
                 if cell_value == stop_condition or cell_value == 2:
-                
-                    hit_wall_orientation = None
 
                     if int(current_pos.y) != int(prev_pos.y) and int(current_pos.x) != int(prev_pos.x):
-
-                        # edge between two cells hit
+                        # Edge between two cells hit (corner)
                         print("corner hit")
-
-                        # backtrack and increase step resolution
                         current_pos -= increment_vector
                         increment_vector *= 0.01
 
-                        while True:
-
+                        while max_iter > 0:
                             current_pos += increment_vector
                             prev_pos = current_pos - increment_vector
-
                             cell_value = map[int(current_pos.y)][int(current_pos.x)]
 
                             if cell_value == stop_condition or cell_value == 2:
+                                return handle_hit(current_pos, prev_pos, map)
 
-                                if int(current_pos.x) != int(prev_pos.x):
-                                    hit_wall_orientation = "vertical"
-                                    print("vertical")
+                            max_iter -= 1
 
-                                elif int(current_pos.y) != int(prev_pos.y):
-                                    hit_wall_orientation = "horizontal"
-                                    print("horizontal")
-
-                                prev_cell_value = map[int(prev_pos.y)][int(prev_pos.x)]
-
-                                return Hit(current_pos, self, hit_wall_orientation, cell_value, prev_cell_value)
-
-
-                    if int(current_pos.x) != int(prev_pos.x):
-                        hit_wall_orientation = "vertical"
-                        print("vertical")
-
-                    elif int(current_pos.y) != int(prev_pos.y):
-                        hit_wall_orientation = "horizontal"
-                        print("horizontal")
-
-                    prev_cell_value = map[int(prev_pos.y)][int(prev_pos.x)]
-
-                    return Hit(current_pos, self, hit_wall_orientation, cell_value, prev_cell_value)
+                    return handle_hit(current_pos, prev_pos, map)
 
             except IndexError:
-                pg.alert(
-                    "System crashed - probably because the entered parameters are too intensive"
-                )
+                pg.alert("System crashed - probably because the entered parameters are too intensive")
                 exit()
 
             max_iter -= 1
+
 
     def cast(self, game_map, cast_type, refracting):
         if cast_type == "Primitive_Cast":
