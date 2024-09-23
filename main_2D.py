@@ -229,6 +229,9 @@ def perform_trace(player, game_map, screen, hit_lst):
                     break
 
 
+                if not curr_hit.wall_orientation:
+                    break
+
                 new_ray = Ray.reflectRay(curr_hit, new_intensity)
                 new_hit = new_ray.cast(game_map, refracting=False)
 
@@ -266,7 +269,26 @@ def perform_trace(player, game_map, screen, hit_lst):
                     segments=50,
                 )
 
-                if new_hit.wall_orientation:
+                # check for TIR
+                if new_ray.TIR:
+                    
+                    exit_ray = Ray.reflectRay(new_hit, new_ray.intensity)
+
+                    exit_hit = exit_ray.cast(game_map, refracting=True)
+
+                    draw_fading_ray(
+                        screen,
+                        exit_ray.pos,
+                        exit_hit.pos,
+                        alpha_start=exit_ray.intensity,
+                        alpha_end=exit_ray.intensity / Values.get_value("Decay_Factor"),
+                        segments=50,
+                    )
+
+                    curr_hit = exit_hit
+
+
+                elif new_hit.wall_orientation:
 
                     exit_ray = Ray(new_hit.pos,hit.ray.dir, hit.ray.intensity)
 

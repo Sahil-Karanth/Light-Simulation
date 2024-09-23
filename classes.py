@@ -74,10 +74,11 @@ class Player:
 
 
 class Ray:
-    def __init__(self, pos, dir, intensity=255):
+    def __init__(self, pos, dir, intensity=255, TIR=False):
         self.pos = pos
         self.dir = dir.normalise()
         self.intensity = intensity
+        self.TIR = TIR
 
     def __str__(self):
         return f"r = {self.pos.values} + t{self.dir.values}"
@@ -110,7 +111,7 @@ class Ray:
         return hit_lst
     
 
-    def __specularReflectRay(hit, new_intensity, TIR=False):
+    def __specularReflectRay(hit, new_intensity):
         if hit.wall_orientation == "horizontal":
             new_dir = Vector([hit.ray.dir.x, hit.ray.dir.y * -1])
         elif hit.wall_orientation == "vertical":
@@ -184,17 +185,10 @@ class Ray:
         
         incident_angle = Ray.__get_incidence_angle(ray_angle, hit.wall_orientation)
 
-        # critical_angle = np.arcsin(1 / Values.get_value("Refractive_Index"))
-
-        # if incident_angle > critical_angle and hit.prev_cell_value == 0 and hit.cell_value == 1:
-        #     print("TIR")
-        #     return Ray.__specularReflectRay(hit, new_intensity, TIR=True)
-
 
         refracted_angle = np.arcsin(
             np.sin(incident_angle) / Values.get_value("Refractive_Index")
         )
-
 
         # Calculate the new direction based on the refracted angle
         if hit.wall_orientation == "vertical":
@@ -207,10 +201,14 @@ class Ray:
                 math.sin(refracted_angle) * (-1 if hit.ray.dir.x < 0 else 1),
                 math.cos(refracted_angle) * (-1 if hit.ray.dir.y < 0 else 1)
             ])
+        
 
-        new_ray = Ray(hit.pos, new_dir, new_intensity)
+        critical_angle = np.arcsin(1 / Values.get_value("Refractive_Index"))
 
-        return new_ray
+        if incident_angle > critical_angle and hit.prev_cell_value == 0 and hit.cell_value == 1:
+            return Ray(hit.pos, new_dir, new_intensity, TIR=True)
+
+        return Ray(hit.pos, new_dir, new_intensity)
 
     def cast(self, map, refracting, max_iter=100000):
         def handle_hit(current_pos, prev_pos, map):
@@ -218,10 +216,8 @@ class Ray:
 
             if int(current_pos.x) != int(prev_pos.x):
                 hit_wall_orientation = "vertical"
-                print("vertical")
             elif int(current_pos.y) != int(prev_pos.y):
                 hit_wall_orientation = "horizontal"
-                print("horizontal")
 
             prev_cell_value = map[int(prev_pos.y)][int(prev_pos.x)]
             return Hit(current_pos, self, hit_wall_orientation, map[int(current_pos.y)][int(current_pos.x)], prev_cell_value)
@@ -239,8 +235,10 @@ class Ray:
                 if cell_value == stop_condition or cell_value == 2:
 
                     if int(current_pos.y) != int(prev_pos.y) and int(current_pos.x) != int(prev_pos.x):
+                        
                         # Edge between two cells hit (corner)
-                        print("corner hit")
+                        
+                        # backtrack and increase resolution
                         current_pos -= increment_vector
                         increment_vector *= 0.01
 

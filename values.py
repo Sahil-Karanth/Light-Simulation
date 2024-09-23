@@ -15,7 +15,7 @@ class Values:
 
         # adjustable in settings
         "Number_Of_Rays": 1,
-        "Max_Reflections": 0,
+        "Max_Reflections": 5,
         "Decay_Factor": 1.5,
         "Field_Of_View": np.pi / 6,
 
