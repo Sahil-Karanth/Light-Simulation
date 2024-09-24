@@ -19,8 +19,8 @@ class Values:
         "Decay_Factor": 1.5,
         "Field_Of_View": np.pi / 6,
 
-        "Reflection_Mode": "reflection",
-        "Reflection_Type": "specular",
+        "Reflection_Mode": "Reflection",
+        "TIR_Mode": "TIR_ON"
     }
 
     def get_value(key):
@@ -34,10 +34,13 @@ class Values:
             Values.set_value("Reflection_Mode", "Reflection")
         elif value == "Refraction_Mode":
             Values.set_value("Reflection_Mode", "Refraction")
-        elif value == "Specular_Reflection":
-            Values.set_value("Reflection_Type", "Specular")
-        elif value == "Diffuse_Reflection":
-            Values.set_value("Reflection_Type", "Diffuse")
+
+        elif value == "TIR_On":
+            Values.set_value("TIR_Mode", "TIR_ON")
+        
+        elif value == "TIR_Off":
+            Values.set_value("TIR_Mode", "TIR_OFF")
+            
         else:
             raise ValueError("Invalid toggle value.")
     
