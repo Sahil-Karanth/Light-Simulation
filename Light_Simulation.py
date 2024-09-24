@@ -210,7 +210,6 @@ def draw_map(screen, game_map):
 
 def check_for_settings_open():
     if pygame.key.get_pressed()[pygame.K_p]:
-        print("Opening settings window")
         settings_window = SettingsWindow()
         settings_window.run()
 
@@ -345,7 +344,6 @@ def perform_trace(player, game_map, screen, hit_lst):
                     refraction_angles.incident_angle, refraction_angles.critical_angle
                 ):
                     # hit a corner which is a refraction edge case
-                    print("corner hit")
                     break
 
                 intensity /= Values.get_value("Decay_Factor")
