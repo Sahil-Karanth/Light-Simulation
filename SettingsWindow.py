@@ -81,6 +81,11 @@ class SettingsWindow:
 
 
     def __handle_toggle_change(self, event):
+
+        # if the button is already selected, do nothing
+        if event in self.selected_buttons:
+            return
+
         self.selected_buttons.append(event)
         self.selected_buttons.remove(self.TOGGLE_PAIRS[event])
 
