@@ -21,7 +21,7 @@ def make_map():
     with open("map.txt", "w") as file:
 
         file.write("2" * width + "\n")
-        for i in range(height - 2):
+        for _ in range(height - 2):
             file.write(f"2{'0'*(width-2)}2\n")
         file.write("2" * width + "\n")
 
@@ -267,9 +267,8 @@ def perform_trace(player, game_map, screen, hit_lst):
                 if not refraction_angles:
                     break
 
+                # refract into block (glass)
                 new_ray = Ray.refractRay(curr_hit, refraction_angles, 255)
-
-
                 new_hit = new_ray.cast(game_map, refracting=True)
 
                 if new_hit.cell_value == 2:
@@ -283,8 +282,6 @@ def perform_trace(player, game_map, screen, hit_lst):
                     alpha_end=new_ray.intensity / Values.get_value("Decay_Factor"),
                     segments=50,
                 )
-
-                # now we've done the first refraction into the block until it hits the boundary from wall to air
             
                 refraction_angles = Ray.get_refraction_angles(new_hit, going_to_air=True)
 
@@ -294,6 +291,7 @@ def perform_trace(player, game_map, screen, hit_lst):
                 else:
                     TIR_again = False
 
+                # doing TIR
                 while TIR_again:
 
                     TIR_ray = Ray.reflectRay(new_hit, new_ray.intensity)
@@ -325,14 +323,13 @@ def perform_trace(player, game_map, screen, hit_lst):
 
                     new_hit = TIR_hit
 
-
-
                 # now TIR is done (or never happened) so we need to refract back into the air
 
                 refraction_angles = Ray.get_refraction_angles(new_hit, going_to_air=True)
 
                 if refraction_angles.incident_angle > refraction_angles.critical_angle:
                     # hit a corner which is a refraction edge case
+                    print("corner hit")
                     break
 
 

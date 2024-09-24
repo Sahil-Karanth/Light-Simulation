@@ -59,6 +59,7 @@ class SettingsWindow:
             [self.__create_slider(0, 20, 1, "Max Reflections")],
             [self.__create_slider(1, 5, 0.2, "Decay Factor")],
             [self.__create_slider(10, 360, 1, "Field Of View")],
+            [self.__create_slider(1, 5, 0.2, "Refractive Index")],
             [self.__create_toggle_button("Reflection Mode", "Refraction Mode")],
             [apply_button]
         ]
@@ -72,6 +73,7 @@ class SettingsWindow:
         Values.set_value("Max_Reflections", int(values["Max_Reflections"]))
         Values.set_value("Decay_Factor", float(values["Decay_Factor"]))
         Values.set_value("Field_Of_View", float(values["Field_Of_View"]) * np.pi / 180)
+        Values.set_value("Refractive_Index", float(values["Refractive_Index"]))
 
         # update from toggle states
         for button in self.selected_buttons:
