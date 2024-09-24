@@ -89,7 +89,7 @@ class SettingsWindow:
         while True:
             event, values = self.window.Read()
             if event is None or event == "Cancel":
-                break
+                exit()
 
             if event == "Apply":
                 self.__apply_settings(values)
