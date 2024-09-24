@@ -9,13 +9,13 @@ class SettingsWindow:
     TOGGLE_PAIRS = {
         "Reflection_Mode": "Refraction_Mode",
         "Refraction_Mode": "Reflection_Mode",
-        "TIR_On": "TIR_Off",
-        "TIR_Off": "TIR_On",
+        "Specular_Reflection": "Diffuse_Reflection",
+        "Diffuse_Reflection": "Specular_Reflection",
     }
 
     def __init__(self):
         self.window = sg.Window("Settings", self.__create_layout())
-        self.selected_buttons = ["Reflection_Mode", "TIR_On"]
+        self.selected_buttons = ["Reflection_Mode", "Specular_Reflection"]
 
     def __create_slider(self, min_value, max_value, step, label):
 
@@ -62,7 +62,7 @@ class SettingsWindow:
             [self.__create_slider(1, 5, 0.2, "Decay Factor")],
             [self.__create_slider(10, 360, 1, "Field Of View")],
             [self.__create_toggle_button("Reflection Mode", "Refraction Mode")],
-            [self.__create_toggle_button("TIR On", "TIR Off")],
+            [self.__create_toggle_button("Specular Reflection", "Diffuse Reflection")],
             [apply_button]
         ]
 
@@ -76,6 +76,7 @@ class SettingsWindow:
         Values.set_value("Decay_Factor", float(values["Decay_Factor"]))
         Values.set_value("Field_Of_View", float(values["Field_Of_View"]) * np.pi / 180)
 
+        # update from toggle states
         for button in self.selected_buttons:
             Values.set_toggle_value(button)
 
