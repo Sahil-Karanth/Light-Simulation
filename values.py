@@ -11,7 +11,7 @@ class Values:
         "SCREEN_WIDTH": CELL_SIZE * 20,
         "SCREEN_HEIGHT": CELL_SIZE * 20,
         "MOVEMENT_SPEED": 0.8,
-        "Refractive_Index": 3,
+        "Refractive_Index": 1.5,
 
         # adjustable in settings
         "Number_Of_Rays": 1,

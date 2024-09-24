@@ -185,13 +185,9 @@ class Ray:
 
         if going_to_air:
 
-            print(f"incident_angle: {to_degrees(incident_angle)}")
-
             refracted_angle = np.arcsin(
                 np.sin(incident_angle) * Values.get_value("Refractive_Index")
             )
-
-            print(f"refracted_angle: {to_degrees(refracted_angle)}")
 
         else:
             refracted_angle = np.arcsin(
