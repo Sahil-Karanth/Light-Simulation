@@ -95,7 +95,7 @@ def draw_player(screen, player):
     )
 
 
-def draw_ray(screen, start_vec, end_vec, colour=(255, 255, 0), alpha=255):
+def draw_ray(screen, start_vec, end_vec, colour=(255, 204, 0), alpha=255):
 
     ray_surface = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
 
@@ -218,16 +218,26 @@ def check_for_settings_open():
         settings_window = SettingsWindow()
         settings_window.run()
 
+def is_TIR(incident_angle, critical_angle):
+    if incident_angle > critical_angle:
+        return True
+    return False
+
 def perform_trace(player, game_map, screen, hit_lst):
     for hit in hit_lst:
-        draw_fading_ray(
-            screen,
-            player.pos,
-            hit.pos,
-            alpha_start=hit.ray.intensity,
-            alpha_end=hit.ray.intensity / Values.get_value("Decay_Factor"),
-            segments=50,
-        )
+
+        if Values.get_value("Reflection_Mode") == "Reflection":
+            draw_fading_ray(
+                screen,
+                player.pos,
+                hit.pos,
+                alpha_start=hit.ray.intensity,
+                alpha_end=hit.ray.intensity / Values.get_value("Decay_Factor"),
+                segments=50,
+            )
+        else:
+            draw_ray(screen, player.pos, hit.pos)
+
         curr_hit = hit
 
         if Values.get_value("Reflection_Mode") == "Reflection":
@@ -244,6 +254,9 @@ def perform_trace(player, game_map, screen, hit_lst):
                 if not curr_hit.wall_orientation:
                     break
 
+                new_ray = Ray.reflectRay(curr_hit, new_intensity)
+                new_hit = new_ray.cast(game_map, refracting=False)
+
                 draw_fading_ray(
                     screen,
                     new_ray.pos,
@@ -256,8 +269,6 @@ def perform_trace(player, game_map, screen, hit_lst):
                 curr_hit = new_hit
 
         elif Values.get_value("Reflection_Mode") == "Refraction" and hit.cell_value != 2:
-
-            start_intensity = hit.ray.intensity
 
             while True:
 
@@ -272,26 +283,13 @@ def perform_trace(player, game_map, screen, hit_lst):
 
                 if new_hit.cell_value == 2:
                     break
-
-                start_intensity = start_intensity / Values.get_value("Decay_Factor")
-                end_intensity = start_intensity / Values.get_value("Decay_Factor")
                 
-                draw_fading_ray(
-                    screen,
-                    new_ray.pos,
-                    new_hit.pos,
-                    alpha_start=start_intensity,
-                    alpha_end=end_intensity,
-                    segments=50,
-                )
+
+                draw_ray(screen, new_ray.pos, new_hit.pos)
             
                 refraction_angles = Ray.get_refraction_angles(new_hit, going_to_air=True)
 
-                if refraction_angles.incident_angle > refraction_angles.critical_angle:
-                    TIR_again = True
-
-                else:
-                    TIR_again = False
+                TIR_again = is_TIR(refraction_angles.incident_angle, refraction_angles.critical_angle)
 
                 # doing TIR
                 while TIR_again:
@@ -301,17 +299,8 @@ def perform_trace(player, game_map, screen, hit_lst):
 
                     TIR_hit = TIR_ray.cast(game_map, refracting=True)
 
-                    start_intensity = start_intensity / Values.get_value("Decay_Factor")
-                    end_intensity = start_intensity / Values.get_value("Decay_Factor")
 
-                    draw_fading_ray(
-                        screen,
-                        TIR_ray.pos,
-                        TIR_hit.pos,
-                        alpha_start=start_intensity,
-                        alpha_end=end_intensity,
-                        segments=50,
-                    )
+                    draw_ray(screen, TIR_ray.pos, TIR_hit.pos)
 
                     # determine if TIR should happen again
 
@@ -320,11 +309,7 @@ def perform_trace(player, game_map, screen, hit_lst):
                     if not refraction_angles:
                         break
 
-                    if refraction_angles.incident_angle > refraction_angles.critical_angle:
-                        TIR_again = True
-
-                    else:
-                        TIR_again = False
+                    TIR_again = is_TIR(refraction_angles.incident_angle, refraction_angles.critical_angle)
 
                     new_hit = TIR_hit
 
@@ -332,7 +317,7 @@ def perform_trace(player, game_map, screen, hit_lst):
 
                 refraction_angles = Ray.get_refraction_angles(new_hit, going_to_air=True)
 
-                if refraction_angles.incident_angle > refraction_angles.critical_angle:
+                if is_TIR(refraction_angles.incident_angle, refraction_angles.critical_angle):
                     # hit a corner which is a refraction edge case
                     print("corner hit")
                     break
@@ -342,17 +327,8 @@ def perform_trace(player, game_map, screen, hit_lst):
 
                 new_hit = new_ray.cast(game_map, refracting=False)
 
-                start_intensity = start_intensity / Values.get_value("Decay_Factor")
-                end_intensity = start_intensity / Values.get_value("Decay_Factor")
 
-                draw_fading_ray(
-                    screen,
-                    new_ray.pos,
-                    new_hit.pos,
-                    alpha_start=start_intensity,
-                    alpha_end=end_intensity,
-                    segments=50,
-                )
+                draw_ray(screen, new_ray.pos, new_hit.pos)
 
                 curr_hit = new_hit
 

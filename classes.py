@@ -68,7 +68,6 @@ class Player:
     def __init__(self, pos, dir):
         self.pos = Vector(pos)
         self.dir = Vector(dir).normalise()
-        self.fov = Values.get_value("Field_Of_View")
 
     def move(self, dir):
         self.pos += dir
@@ -102,13 +101,14 @@ class Ray:
 
         hit_lst = []
 
-        for angle in np.linspace(-player.fov / 2, player.fov / 2, num_rays):
+        fov = Values.get_value("Field_Of_View")
+
+        for angle in np.linspace(-fov / 2, fov / 2, num_rays):
             ray = Ray(player.pos, player.dir.rotate(angle))
 
             hit_lst.append(loop_code(ray))
 
         return hit_lst
-
 
     @staticmethod
     def reflectRay(hit, new_intensity):
