@@ -5,7 +5,7 @@ import numpy as np
 import pyautogui as pg
 import pygame
 
-from classes import Player, Ray, Vector
+from classes import Player, Ray, Vector, to_degrees
 from SettingsWindow import SettingsWindow
 from values import Values
 
@@ -264,6 +264,8 @@ def perform_trace(player, game_map, screen, hit_lst):
 
                 refraction_angles = Ray.get_refraction_angles(curr_hit, going_to_air=False)
 
+                # print("ANGLE OF INCIDENCE: ", to_degrees(refraction_angles.incident_angle))
+
                 if not refraction_angles:
                     break
 
@@ -288,10 +290,17 @@ def perform_trace(player, game_map, screen, hit_lst):
 
                 # now we've done the first refraction into the block until it hits the boundary from wall to air
                 max_iter = 10
-                TIR_again = True
-                while max_iter > 0 and TIR_again:
+            
+                refraction_angles = Ray.get_refraction_angles(new_hit, going_to_air=True)
+                if not refraction_angles:
+                    break
+                if refraction_angles.incident_angle > refraction_angles.critical_angle:
+                    TIR_again = True
 
-                    print("INSIDE THE TIR LOOP")
+                else:
+                    TIR_again = False
+
+                while max_iter > 0 and TIR_again:
 
                     TIR_ray = Ray.reflectRay(new_hit, new_ray.intensity)
 
@@ -318,30 +327,23 @@ def perform_trace(player, game_map, screen, hit_lst):
 
                     if refraction_angles.incident_angle > refraction_angles.critical_angle:
                         TIR_again = True
-                        print("TIR AGAIN")
 
                     else:
                         TIR_again = False
-                        print("NO TIR AGAIN")
+                        print(f"NO TIR AGAIN LEAVING ON INCIDENT ANGLE: {to_degrees(refraction_angles.incident_angle)}")
 
                     new_hit = TIR_hit
 
-
-
-                print("OUTSIDE THE TIR LOOP")
 
 
                 # now TIR is done (or never happened), we need to refract back into the air
 
                 refraction_angles = Ray.get_refraction_angles(new_hit, going_to_air=True)
 
-                if not refraction_angles:
+                if refraction_angles.incident_angle > refraction_angles.critical_angle:
                     break
 
                 new_ray = Ray.refractRay(new_hit, refraction_angles, 255, going_to_air=True)
-
-                if not new_ray.dir or not new_ray.pos:
-                    break
 
                 new_hit = new_ray.cast(game_map, refracting=False)
 
