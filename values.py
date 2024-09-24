@@ -20,7 +20,6 @@ class Values:
         "Field_Of_View": np.pi / 6,
 
         "Reflection_Mode": "reflection",
-        "Reflection_Type": "specular",
     }
 
     def get_value(key):
@@ -34,10 +33,6 @@ class Values:
             Values.set_value("Reflection_Mode", "Reflection")
         elif value == "Refraction_Mode":
             Values.set_value("Reflection_Mode", "Refraction")
-        elif value == "Specular_Reflection":
-            Values.set_value("Reflection_Type", "Specular")
-        elif value == "Diffuse_Reflection":
-            Values.set_value("Reflection_Type", "Diffuse")
         else:
             raise ValueError("Invalid toggle value.")
     

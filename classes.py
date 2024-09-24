@@ -109,7 +109,9 @@ class Ray:
 
         return hit_lst
 
-    def __specularReflectRay(hit, new_intensity):
+
+    @staticmethod
+    def reflectRay(hit, new_intensity):
         if hit.wall_orientation == "horizontal":
             new_dir = Vector([hit.ray.dir.x, hit.ray.dir.y * -1])
         elif hit.wall_orientation == "vertical":
@@ -120,34 +122,6 @@ class Ray:
         new_ray = Ray(hit.pos, new_dir, new_intensity)
 
         return new_ray
-
-    def __diffuseReflectRay(hit, new_intensity):
-        if hit.wall_orientation == "vertical":
-            max_angle = math.pi / 2
-            min_angle = 0
-
-        elif hit.wall_orientation == "horizontal":
-            max_angle = math.pi
-            min_angle = math.pi / 2
-
-        else:
-            raise ValueError("Invalid wall orientation.")
-
-        angle = np.random.uniform(min_angle, max_angle)
-
-        new_dir = hit.ray.dir.rotate(angle)
-
-        new_ray = Ray(hit.pos, new_dir, new_intensity)
-
-        return new_ray
-
-    @staticmethod
-    def reflectRay(hit, new_intensity):
-
-        if Values.get_value("Reflection_Type") == "Specular":
-            return Ray.__specularReflectRay(hit, new_intensity)
-        elif Values.get_value("Reflection_Type") == "Diffuse":
-            return Ray.__diffuseReflectRay(hit, new_intensity)
 
     @staticmethod
     def __get_incidence_angle(angle, wall_orientation):
