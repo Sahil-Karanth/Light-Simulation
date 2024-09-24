@@ -32,28 +32,28 @@ def load_map(file):
 
 
 def draw_grid_cell(screen, x, y, fill_color):
-    # pygame.draw.rect(
-    #     screen,
-    #     fill_color,
-    #     (
-    #         x * Values.get_value("CELL_SIZE"),
-    #         y * Values.get_value("CELL_SIZE"),
-    #         Values.get_value("CELL_SIZE"),
-    #         Values.get_value("CELL_SIZE"),
-    #     ),
-    # )
-
     pygame.draw.rect(
         screen,
-        (255,255,255),
+        fill_color,
         (
             x * Values.get_value("CELL_SIZE"),
             y * Values.get_value("CELL_SIZE"),
             Values.get_value("CELL_SIZE"),
             Values.get_value("CELL_SIZE"),
         ),
-        1
     )
+
+    # pygame.draw.rect(
+    #     screen,
+    #     (255,255,255),
+    #     (
+    #         x * Values.get_value("CELL_SIZE"),
+    #         y * Values.get_value("CELL_SIZE"),
+    #         Values.get_value("CELL_SIZE"),
+    #         Values.get_value("CELL_SIZE"),
+    #     ),
+    #     1
+    # )
 
 
 def check_for_map_changes(game_map, mouse_pos, player):
