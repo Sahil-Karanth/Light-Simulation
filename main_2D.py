@@ -244,9 +244,6 @@ def perform_trace(player, game_map, screen, hit_lst):
                 if not curr_hit.wall_orientation:
                     break
 
-                new_ray = Ray.reflectRay(curr_hit, new_intensity)
-                new_hit = new_ray.cast(game_map, refracting=False)
-
                 draw_fading_ray(
                     screen,
                     new_ray.pos,
@@ -259,6 +256,8 @@ def perform_trace(player, game_map, screen, hit_lst):
                 curr_hit = new_hit
 
         elif Values.get_value("Reflection_Mode") == "Refraction" and hit.cell_value != 2:
+
+            start_intensity = hit.ray.intensity
 
             while True:
 
@@ -273,13 +272,16 @@ def perform_trace(player, game_map, screen, hit_lst):
 
                 if new_hit.cell_value == 2:
                     break
+
+                start_intensity = start_intensity / Values.get_value("Decay_Factor")
+                end_intensity = start_intensity / Values.get_value("Decay_Factor")
                 
                 draw_fading_ray(
                     screen,
                     new_ray.pos,
                     new_hit.pos,
-                    alpha_start=new_ray.intensity,
-                    alpha_end=new_ray.intensity / Values.get_value("Decay_Factor"),
+                    alpha_start=start_intensity,
+                    alpha_end=end_intensity,
                     segments=50,
                 )
             
@@ -299,12 +301,15 @@ def perform_trace(player, game_map, screen, hit_lst):
 
                     TIR_hit = TIR_ray.cast(game_map, refracting=True)
 
+                    start_intensity = start_intensity / Values.get_value("Decay_Factor")
+                    end_intensity = start_intensity / Values.get_value("Decay_Factor")
+
                     draw_fading_ray(
                         screen,
                         TIR_ray.pos,
                         TIR_hit.pos,
-                        alpha_start=TIR_ray.intensity,
-                        alpha_end=TIR_ray.intensity / Values.get_value("Decay_Factor"),
+                        alpha_start=start_intensity,
+                        alpha_end=end_intensity,
                         segments=50,
                     )
 
@@ -337,12 +342,15 @@ def perform_trace(player, game_map, screen, hit_lst):
 
                 new_hit = new_ray.cast(game_map, refracting=False)
 
+                start_intensity = start_intensity / Values.get_value("Decay_Factor")
+                end_intensity = start_intensity / Values.get_value("Decay_Factor")
+
                 draw_fading_ray(
                     screen,
                     new_ray.pos,
                     new_hit.pos,
-                    alpha_start=new_ray.intensity,
-                    alpha_end=new_ray.intensity / Values.get_value("Decay_Factor"),
+                    alpha_start=start_intensity,
+                    alpha_end=end_intensity,
                     segments=50,
                 )
 
