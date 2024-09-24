@@ -197,7 +197,7 @@ def draw_map(screen, game_map):
     for y, row in enumerate(game_map):
         for x, cell in enumerate(row):
             if cell == 1:
-            
+
                 if Values.get_value("Reflection_Mode") == "Reflection":
                     draw_grid_cell(screen, x, y, fill_color=(200, 200, 200))
 
@@ -205,7 +205,7 @@ def draw_map(screen, game_map):
                     draw_grid_cell(screen, x, y, fill_color=(0, 0, 139))
 
             elif cell == 2:
-                draw_grid_cell(screen, x, y, fill_color=(200, 200, 200))                
+                draw_grid_cell(screen, x, y, fill_color=(200, 200, 200))
 
 
 def check_for_settings_open():
@@ -214,10 +214,12 @@ def check_for_settings_open():
         settings_window = SettingsWindow()
         settings_window.run()
 
+
 def is_TIR(incident_angle, critical_angle):
     if incident_angle > critical_angle:
         return True
     return False
+
 
 def perform_trace(player, game_map, screen, hit_lst):
     for hit in hit_lst:
@@ -243,7 +245,6 @@ def perform_trace(player, game_map, screen, hit_lst):
                 if new_intensity < 1:
                     break
 
-
                 if not curr_hit.wall_orientation:
                     break
 
@@ -261,13 +262,17 @@ def perform_trace(player, game_map, screen, hit_lst):
 
                 curr_hit = new_hit
 
-        elif Values.get_value("Reflection_Mode") == "Refraction" and hit.cell_value != 2:
+        elif (
+            Values.get_value("Reflection_Mode") == "Refraction" and hit.cell_value != 2
+        ):
 
             intensity = curr_hit.ray.intensity
 
             while True:
 
-                refraction_angles = Ray.get_refraction_angles(curr_hit, going_to_air=False)
+                refraction_angles = Ray.get_refraction_angles(
+                    curr_hit, going_to_air=False
+                )
 
                 if not refraction_angles:
                     break
@@ -279,7 +284,6 @@ def perform_trace(player, game_map, screen, hit_lst):
 
                 if new_hit.cell_value == 2:
                     break
-                
 
                 # draw_ray(screen, new_ray.pos, new_hit.pos)
 
@@ -292,10 +296,13 @@ def perform_trace(player, game_map, screen, hit_lst):
                     segments=50,
                 )
 
-            
-                refraction_angles = Ray.get_refraction_angles(new_hit, going_to_air=True)
+                refraction_angles = Ray.get_refraction_angles(
+                    new_hit, going_to_air=True
+                )
 
-                TIR_again = is_TIR(refraction_angles.incident_angle, refraction_angles.critical_angle)
+                TIR_again = is_TIR(
+                    refraction_angles.incident_angle, refraction_angles.critical_angle
+                )
 
                 # doing TIR
                 while TIR_again:
@@ -321,24 +328,29 @@ def perform_trace(player, game_map, screen, hit_lst):
                     if not refraction_angles:
                         break
 
-                    TIR_again = is_TIR(refraction_angles.incident_angle, refraction_angles.critical_angle)
+                    TIR_again = is_TIR(
+                        refraction_angles.incident_angle,
+                        refraction_angles.critical_angle,
+                    )
 
                     new_hit = TIR_hit
 
                 # now TIR is done (or never happened) so we need to refract back into the air
 
-                refraction_angles = Ray.get_refraction_angles(new_hit, going_to_air=True)
+                refraction_angles = Ray.get_refraction_angles(
+                    new_hit, going_to_air=True
+                )
 
-                if is_TIR(refraction_angles.incident_angle, refraction_angles.critical_angle):
+                if is_TIR(
+                    refraction_angles.incident_angle, refraction_angles.critical_angle
+                ):
                     # hit a corner which is a refraction edge case
                     print("corner hit")
                     break
 
-
                 intensity /= Values.get_value("Decay_Factor")
                 new_ray = Ray.refractRay(new_hit, refraction_angles, intensity)
                 new_hit = new_ray.cast(game_map, refracting=False)
-
 
                 # draw_ray(screen, new_ray.pos, new_hit.pos)
                 draw_fading_ray(
@@ -353,9 +365,6 @@ def perform_trace(player, game_map, screen, hit_lst):
                 curr_hit = new_hit
 
 
-
-
-
 def main():
 
     make_map()
@@ -367,8 +376,10 @@ def main():
         (Values.get_value("SCREEN_WIDTH"), Values.get_value("SCREEN_WIDTH"))
     )
     pygame.display.set_caption(
-        "Raycasting | press 'i' for instructions, 'p' for settings"
+        "Light Simulation (by Sahil Karanth) | press 'i' for instructions, 'p' for settings"
     )
+
+    pygame.display.set_icon(pygame.image.load("bulb.png"))
 
     screen.fill((0, 0, 0))
 
@@ -410,7 +421,6 @@ def main():
                 ]
             ).normalise()
 
-
             simulate_next_pos = player.pos + next_move
 
             # Check if the next position is a wall
@@ -425,7 +435,6 @@ def main():
             hit_lst = Ray.initialRayCast(player, game_map)
 
             perform_trace(player, game_map, screen, hit_lst)
-
 
         pygame.display.flip()
         pygame.time.Clock().tick(60)
