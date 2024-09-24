@@ -2,5 +2,5 @@ Use "WASD" to move the light source
 Use the mouse to rotate the light source
 Drag left click to draw on walls
 Drag right click to remove walls
-Press 'M' to switch between reflection and refraction mode
-Press 'S' 
+Press 'p' to open settings to customise the simulation
+Press 'f' to freeze the screen and 'f' again to unfreeze

@@ -5,14 +5,10 @@ import numpy as np
 import pyautogui as pg
 import pygame
 
-from classes import Player, Ray, Vector, to_degrees
+from classes import Player, Ray, Vector
 from SettingsWindow import SettingsWindow
 from values import Values
 
-# TODO:
-# - fix diffuse reflection
-# - add a refractive index to the ray class and slider to adjust
-# - TIR
 
 def make_map():
     width = Values.get_value("SCREEN_WIDTH") // Values.get_value("CELL_SIZE")
@@ -371,7 +367,7 @@ def main():
         (Values.get_value("SCREEN_WIDTH"), Values.get_value("SCREEN_WIDTH"))
     )
     pygame.display.set_caption(
-        "Raycasting | press 'p' to open settings | press 'f' to freeze (good for diffuse)"
+        "Raycasting | press 'i' for instructions, 'p' for settings"
     )
 
     screen.fill((0, 0, 0))
@@ -391,6 +387,9 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_f:
                     frozen = not frozen
+
+                if event.key == pygame.K_i:
+                    pg.alert(get_instruction_text(), "Instructions")
 
         check_for_settings_open()
 
