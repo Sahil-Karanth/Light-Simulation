@@ -32,15 +32,27 @@ def load_map(file):
 
 
 def draw_grid_cell(screen, x, y, fill_color):
+    # pygame.draw.rect(
+    #     screen,
+    #     fill_color,
+    #     (
+    #         x * Values.get_value("CELL_SIZE"),
+    #         y * Values.get_value("CELL_SIZE"),
+    #         Values.get_value("CELL_SIZE"),
+    #         Values.get_value("CELL_SIZE"),
+    #     ),
+    # )
+
     pygame.draw.rect(
         screen,
-        fill_color,
+        (255,255,255),
         (
             x * Values.get_value("CELL_SIZE"),
             y * Values.get_value("CELL_SIZE"),
             Values.get_value("CELL_SIZE"),
             Values.get_value("CELL_SIZE"),
         ),
+        1
     )
 
 
@@ -249,8 +261,13 @@ def perform_trace(player, game_map, screen, hit_lst):
         elif Values.get_value("Reflection_Mode") == "Refraction" and hit.cell_value != 2:
 
             for _ in range(Values.get_value("Max_Reflections")):
-            
-                new_ray = Ray.refractRay(curr_hit, 255)
+
+                refraction_angles = Ray.get_refraction_angles(curr_hit, going_to_air=False)
+
+                if not refraction_angles:
+                    break
+
+                new_ray = Ray.refractRay(curr_hit, refraction_angles, 255)
 
                 if not new_ray:
                     break
@@ -269,41 +286,78 @@ def perform_trace(player, game_map, screen, hit_lst):
                     segments=50,
                 )
 
-                # check for TIR
-                if new_ray.TIR:
-                    
-                    exit_ray = Ray.reflectRay(new_hit, new_ray.intensity)
+                # now we've done the first refraction into the block until it hits the boundary from wall to air
+                max_iter = 10
+                TIR_again = True
+                while max_iter > 0 and TIR_again:
 
-                    exit_hit = exit_ray.cast(game_map, refracting=True)
+                    print("INSIDE THE TIR LOOP")
 
-                    draw_fading_ray(
-                        screen,
-                        exit_ray.pos,
-                        exit_hit.pos,
-                        alpha_start=exit_ray.intensity,
-                        alpha_end=exit_ray.intensity / Values.get_value("Decay_Factor"),
-                        segments=50,
-                    )
+                    TIR_ray = Ray.reflectRay(new_hit, new_ray.intensity)
 
-                    curr_hit = exit_hit
+                    if not TIR_ray:
+                        break
 
-
-                elif new_hit.wall_orientation:
-
-                    exit_ray = Ray(new_hit.pos,hit.ray.dir, hit.ray.intensity)
-
-                    exit_hit = exit_ray.cast(game_map, refracting=False)
+                    TIR_hit = TIR_ray.cast(game_map, refracting=True)
 
                     draw_fading_ray(
                         screen,
-                        exit_ray.pos,
-                        exit_hit.pos,
-                        alpha_start=exit_ray.intensity,
-                        alpha_end=exit_ray.intensity / Values.get_value("Decay_Factor"),
+                        TIR_ray.pos,
+                        TIR_hit.pos,
+                        alpha_start=TIR_ray.intensity,
+                        alpha_end=TIR_ray.intensity / Values.get_value("Decay_Factor"),
                         segments=50,
                     )
 
-                    curr_hit = exit_hit
+                    # determine if TIR should happen again
+
+                    refraction_angles = Ray.get_refraction_angles(TIR_hit)
+
+                    if not refraction_angles:
+                        break
+
+                    if refraction_angles.incident_angle > refraction_angles.critical_angle:
+                        TIR_again = True
+                        print("TIR AGAIN")
+
+                    else:
+                        TIR_again = False
+                        print("NO TIR AGAIN")
+
+                    new_hit = TIR_hit
+
+
+
+                print("OUTSIDE THE TIR LOOP")
+
+
+                # now TIR is done (or never happened), we need to refract back into the air
+
+                refraction_angles = Ray.get_refraction_angles(new_hit, going_to_air=True)
+
+                if not refraction_angles:
+                    break
+
+                new_ray = Ray.refractRay(new_hit, refraction_angles, 255, going_to_air=True)
+
+                if not new_ray.dir or not new_ray.pos:
+                    break
+
+                new_hit = new_ray.cast(game_map, refracting=False)
+
+                draw_fading_ray(
+                    screen,
+                    new_ray.pos,
+                    new_hit.pos,
+                    alpha_start=new_ray.intensity,
+                    alpha_end=new_ray.intensity / Values.get_value("Decay_Factor"),
+                    segments=50,
+                )
+
+                curr_hit = new_hit
+
+
+
 
 
 def main():
