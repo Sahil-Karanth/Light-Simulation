@@ -226,17 +226,14 @@ def is_TIR(incident_angle, critical_angle):
 def perform_trace(player, game_map, screen, hit_lst):
     for hit in hit_lst:
 
-        if Values.get_value("Reflection_Mode") == "Reflection":
-            draw_fading_ray(
-                screen,
-                player.pos,
-                hit.pos,
-                alpha_start=hit.ray.intensity,
-                alpha_end=hit.ray.intensity / Values.get_value("Decay_Factor"),
-                segments=50,
-            )
-        else:
-            draw_ray(screen, player.pos, hit.pos)
+        draw_fading_ray(
+            screen,
+            player.pos,
+            hit.pos,
+            alpha_start=hit.ray.intensity,
+            alpha_end=hit.ray.intensity / Values.get_value("Decay_Factor"),
+            segments=50,
+        )
 
         curr_hit = hit
 
@@ -270,6 +267,8 @@ def perform_trace(player, game_map, screen, hit_lst):
 
         elif Values.get_value("Reflection_Mode") == "Refraction" and hit.cell_value != 2:
 
+            intensity = curr_hit.ray.intensity
+
             while True:
 
                 refraction_angles = Ray.get_refraction_angles(curr_hit, going_to_air=False)
@@ -278,14 +277,25 @@ def perform_trace(player, game_map, screen, hit_lst):
                     break
 
                 # refract into block (glass)
-                new_ray = Ray.refractRay(curr_hit, refraction_angles, 255)
+                intensity /= Values.get_value("Decay_Factor")
+                new_ray = Ray.refractRay(curr_hit, refraction_angles, intensity)
                 new_hit = new_ray.cast(game_map, refracting=True)
 
                 if new_hit.cell_value == 2:
                     break
                 
 
-                draw_ray(screen, new_ray.pos, new_hit.pos)
+                # draw_ray(screen, new_ray.pos, new_hit.pos)
+
+                draw_fading_ray(
+                    screen,
+                    new_ray.pos,
+                    new_hit.pos,
+                    alpha_start=new_ray.intensity,
+                    alpha_end=new_ray.intensity / Values.get_value("Decay_Factor"),
+                    segments=50,
+                )
+
             
                 refraction_angles = Ray.get_refraction_angles(new_hit, going_to_air=True)
 
@@ -294,13 +304,19 @@ def perform_trace(player, game_map, screen, hit_lst):
                 # doing TIR
                 while TIR_again:
 
-                    TIR_ray = Ray.reflectRay(new_hit, new_ray.intensity)
-
-
+                    intensity /= Values.get_value("Decay_Factor")
+                    TIR_ray = Ray.reflectRay(new_hit, intensity)
                     TIR_hit = TIR_ray.cast(game_map, refracting=True)
 
-
-                    draw_ray(screen, TIR_ray.pos, TIR_hit.pos)
+                    # draw_ray(screen, TIR_ray.pos, TIR_hit.pos)
+                    draw_fading_ray(
+                        screen,
+                        TIR_ray.pos,
+                        TIR_hit.pos,
+                        alpha_start=TIR_ray.intensity,
+                        alpha_end=TIR_ray.intensity / Values.get_value("Decay_Factor"),
+                        segments=50,
+                    )
 
                     # determine if TIR should happen again
 
@@ -323,12 +339,20 @@ def perform_trace(player, game_map, screen, hit_lst):
                     break
 
 
-                new_ray = Ray.refractRay(new_hit, refraction_angles, 255)
-
+                intensity /= Values.get_value("Decay_Factor")
+                new_ray = Ray.refractRay(new_hit, refraction_angles, intensity)
                 new_hit = new_ray.cast(game_map, refracting=False)
 
 
-                draw_ray(screen, new_ray.pos, new_hit.pos)
+                # draw_ray(screen, new_ray.pos, new_hit.pos)
+                draw_fading_ray(
+                    screen,
+                    new_ray.pos,
+                    new_hit.pos,
+                    alpha_start=new_ray.intensity,
+                    alpha_end=new_ray.intensity / Values.get_value("Decay_Factor"),
+                    segments=50,
+                )
 
                 curr_hit = new_hit
 
