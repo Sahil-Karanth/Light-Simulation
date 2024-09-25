@@ -19,12 +19,18 @@ class SettingsWindow:
 
         key = label.replace(" ", "_")
 
+        if key == "Field_Of_View":
+            default_value = Values.get_value(key) * 180 / np.pi
+        
+        else:
+            default_value = Values.get_value(key)
+
         slider = sg.Slider(
             key=key,
             range=(min_value, max_value),
             orientation="h",
             size=(15, 15),
-            default_value=Values.get_value(key),
+            default_value=default_value,
             resolution=step,
         )
 
