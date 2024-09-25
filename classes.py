@@ -1,12 +1,9 @@
 import math
-
-import colorama
+import sys
 import numpy as np
 import pyautogui as pg
 
 from values import Values
-
-colorama.init()
 
 
 def to_degrees(rad):
@@ -261,7 +258,7 @@ class Ray:
                 pg.alert(
                     "System crashed - probably because the entered parameters are too intensive"
                 )
-                exit()
+                sys.exit(1)
 
             max_iter -= 1
 

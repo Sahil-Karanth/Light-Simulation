@@ -1,13 +1,22 @@
-import random
-from copy import deepcopy
-
-import numpy as np
 import pyautogui as pg
 import pygame
 
 from classes import Player, Ray, Vector
 from SettingsWindow import SettingsWindow
 from values import Values
+
+import os
+import sys
+
+# for use with PyInstaller (exe file)
+def resource_path(relative_path):
+    """ Get the absolute path to the resource, works for dev and for PyInstaller """
+    try:
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 
 def make_map():
@@ -181,7 +190,9 @@ def get_wasd_move(keys):
 
 def get_instruction_text():
 
-    with open("instructions.txt", "r") as file:
+    file_path = resource_path("instructions.txt")
+
+    with open(file_path, "r") as file:
         return file.read()
 
 
@@ -366,7 +377,9 @@ def perform_trace(player, game_map, screen, hit_lst):
 def main():
 
     make_map()
-    game_map = load_map("map.txt")
+
+    map_file_path = resource_path("map.txt")
+    game_map = load_map(map_file_path)
 
     pygame.init()
 
@@ -377,7 +390,8 @@ def main():
         "Light Simulation (by Sahil Karanth) | press 'i' for instructions, 'p' for settings"
     )
 
-    pygame.display.set_icon(pygame.image.load("bulb.png"))
+    bulb_file_path = resource_path("bulb.png")
+    pygame.display.set_icon(pygame.image.load(bulb_file_path))
 
     screen.fill((0, 0, 0))
 

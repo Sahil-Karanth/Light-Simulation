@@ -1,6 +1,7 @@
 import FreeSimpleGUI as sg
 from values import Values
 import numpy as np
+import sys
 
 sg.theme("SystemDefault")
 
@@ -102,7 +103,7 @@ class SettingsWindow:
         while True:
             event, values = self.window.Read()
             if event is None or event == "Cancel":
-                exit()
+                sys.exit(0)
 
             if event == "Apply":
                 self.__apply_settings(values)
