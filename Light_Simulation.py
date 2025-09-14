@@ -2,7 +2,7 @@ import pyautogui as pg
 import pygame
 
 from classes import Player, Ray, Vector
-from SettingsWindow import SettingsWindow
+from settings_window import SettingsWindow
 from values import Values
 
 import os
