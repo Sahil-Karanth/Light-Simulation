@@ -11,6 +11,9 @@ class Values:
         "SCREEN_WIDTH": CELL_SIZE * 20,
         "SCREEN_HEIGHT": CELL_SIZE * 20,
         "MOVEMENT_SPEED": 0.8,
+        "INITIAL_DIRECTION": [0, -1],
+        "INITIAL_POSITION": [4.5, 4.5],
+        "ROTATION_ANGLE": 0.05,
 
         # adjustable in settings
         "Number_Of_Rays": 1,

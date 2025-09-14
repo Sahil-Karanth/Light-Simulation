@@ -8,6 +8,11 @@ from values import Values
 import os
 import sys
 
+
+OPEN = 0
+MATERIAL_BLOCK = 1
+OUTER_BOUNDS = 2
+
 # for use with PyInstaller (exe file)
 def resource_path(relative_path):
     """ Get the absolute path to the resource, works for dev and for PyInstaller """
@@ -48,19 +53,6 @@ def draw_grid_cell(screen, x, y, fill_color):
         ),
     )
 
-    # pygame.draw.rect(
-    #     screen,
-    #     (255,255,255),
-    #     (
-    #         x * Values.get_value("CELL_SIZE"),
-    #         y * Values.get_value("CELL_SIZE"),
-    #         Values.get_value("CELL_SIZE"),
-    #         Values.get_value("CELL_SIZE"),
-    #     ),
-    #     1
-    # )
-
-
 def check_for_map_changes(game_map, mouse_pos, player):
 
     loc = [
@@ -70,11 +62,11 @@ def check_for_map_changes(game_map, mouse_pos, player):
 
     if pygame.mouse.get_pressed()[0]:
 
-        if game_map[loc[1]][loc[0]] == 0 and loc != [
+        if game_map[loc[1]][loc[0]] == OPEN and loc != [
             int(player.pos.x),
             int(player.pos.y),
         ]:
-            game_map[loc[1]][loc[0]] = 1
+            game_map[loc[1]][loc[0]] = MATERIAL_BLOCK 
 
     # if you right click on the screen, it will remove a wall
     if pygame.mouse.get_pressed()[2]:
@@ -84,8 +76,8 @@ def check_for_map_changes(game_map, mouse_pos, player):
             int(mouse_pos[1] / Values.get_value("CELL_SIZE")),
         ]
 
-        if game_map[loc[1]][loc[0]] == 1:
-            game_map[loc[1]][loc[0]] = 0
+        if game_map[loc[1]][loc[0]] == MATERIAL_BLOCK:
+            game_map[loc[1]][loc[0]] = OPEN
 
 
 def draw_player(screen, player):
@@ -199,23 +191,22 @@ def get_instruction_text():
 def update_player_rotation(keys, player):
 
     if keys[pygame.K_LEFT]:
-        player.dir = player.dir.rotate(-0.05)
+        player.dir = player.dir.rotate(-Values.get_value("ROTATION_ANGLE"))
     elif keys[pygame.K_RIGHT]:
-        player.dir = player.dir.rotate(0.05)
+        player.dir = player.dir.rotate(Values.get_value("ROTATION_ANGLE"))
 
 
 def draw_map(screen, game_map):
     for y, row in enumerate(game_map):
         for x, cell in enumerate(row):
-            if cell == 1:
-
+            if cell == MATERIAL_BLOCK:
                 if Values.get_value("Reflection_Mode") == "Reflection":
                     draw_grid_cell(screen, x, y, fill_color=(200, 200, 200))
 
                 elif Values.get_value("Reflection_Mode") == "Refraction":
                     draw_grid_cell(screen, x, y, fill_color=(0, 0, 139))
 
-            elif cell == 2:
+            elif cell == OUTER_BOUNDS:
                 draw_grid_cell(screen, x, y, fill_color=(200, 200, 200))
 
 
@@ -292,10 +283,8 @@ def perform_trace(player, game_map, screen, hit_lst):
                 new_ray = Ray.refractRay(curr_hit, refraction_angles, intensity)
                 new_hit = new_ray.cast(game_map, refracting=True)
 
-                if new_hit.cell_value == 2:
+                if new_hit.cell_value == OUTER_BOUNDS:
                     break
-
-                # draw_ray(screen, new_ray.pos, new_hit.pos)
 
                 draw_fading_ray(
                     screen,
@@ -321,7 +310,6 @@ def perform_trace(player, game_map, screen, hit_lst):
                     TIR_ray = Ray.reflectRay(new_hit, intensity)
                     TIR_hit = TIR_ray.cast(game_map, refracting=True)
 
-                    # draw_ray(screen, TIR_ray.pos, TIR_hit.pos)
                     draw_fading_ray(
                         screen,
                         TIR_ray.pos,
@@ -395,7 +383,7 @@ def main():
 
     screen.fill((0, 0, 0))
 
-    player = Player([4.5, 4.5], [0, -1])
+    player = Player(Values.get_value("INITIAL_POSITION"), Values.get_value("INITIAL_DIRECTION"))
 
     settings_window = SettingsWindow()
     settings_window.run()
